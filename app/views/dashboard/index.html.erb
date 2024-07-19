@@ -13,7 +13,9 @@
       </svg>
       <div class="mx-auto max-w-md text-center lg:mx-0 lg:flex-auto lg:py-32 lg:text-left">
         <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Boost your productivity.<br>Start using our app today with <%=@user.username%></h2>
-        <p class="mt-6 text-lg leading-8 text-gray-300">Ac euismod vel sit maecenas id pellentesque eu sed consectetur. Malesuada adipiscing sagittis vel nulla.</p>
+        <p class="mt-6 text-lg leading-8 text-gray-300">Ac euismod vel sit maecenas id pellentesque eu sed consectetur. Malesuada adipiscing sagittis vel nulla.<br>
+          Last active at: <%= @person.last_updated_at.present? ? time_ago_in_words(@person.last_updated_at) : 'N/A'%>
+        </p>
         <div class="mt-10 flex items-center justify-center gap-x-6 lg:justify-start">
           <a href="<%=logout_path%>" class="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Backout</a>
           <div class="text-sm font-semibold leading-6 text-white" data-action="click->chats#openModal" id="good-link"> Good Link </div>
