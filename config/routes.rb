@@ -1,4 +1,10 @@
 Rails.application.routes.draw do
+  root to: 'welcome#index'
+  post "auth" => "welcome#create", as: "auth"
+  get 'dash' => "dashboard#index", as: "dashboard"
+  get "dashout" => "welcome#logout", as: "logout"
+
+  post "dash/msg" => "dashboard#send_message"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
