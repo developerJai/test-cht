@@ -78,7 +78,7 @@ export default class extends Controller {
             var newParagraph = document.createElement('p');
 
             // Set the class and content for the paragraph
-            newParagraph.className = 'text-lg leading-8 text-sm text-gray-400 bg-gray-20 text-right';
+            newParagraph.className = 'leading-8 text-sm text-gray-400 bg-gray-20 text-right';
             newParagraph.textContent = result.msg;
 
             msgList.insertBefore(newParagraph, msgList.firstChild);

@@ -4,7 +4,7 @@ class DashboardController < ApplicationController
   def index
     @person = User.where.not(id: @user.id).first
     @removed_texts = @person.removed_texts.order(created_at: "DESC").paginate(page: 1, per_page: 20)
-    @messages = Message.where("created_at>=?", Time.current-1.hour).order(created_at: "DESC").paginate(page: 1, per_page: 20)
+    @messages = Message.where("created_at>=?", Time.current-2.hour).order(created_at: "DESC").paginate(page: 1, per_page: 20)
   end
 
   def send_message
