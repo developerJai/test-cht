@@ -35,6 +35,19 @@ export default class extends Controller {
     
   }
 
+  openRemoved(){
+    try {
+      let removedBox = document.getElementById("removed-text")
+      if(removedBox.classList.contains("hidden")){
+        removedBox.classList.remove("hidden")
+      }else{
+        removedBox.classList.add("hidden")
+      }
+    }catch(){
+      
+    }
+  }
+
   closeModal(){
     let modal = document.getElementById("chat-modal")
     modal.classList.add("hidden")
@@ -101,7 +114,6 @@ export default class extends Controller {
     // Check if the div does not have the hidden class
     if (!modal.classList.contains('hidden')) {
         // Execute your desired functionality here
-        console.log('Div is visible. Running function...');
         // Add your function call or logic here
         const msgFrame = document.getElementById("messages_list");
         msgFrame.src = '/dash';

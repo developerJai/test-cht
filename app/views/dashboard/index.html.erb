@@ -40,12 +40,24 @@
         <dt class="text-base leading-7 text-gray-600">Assets under holding</dt>
         <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">$119 trillion</dd>
       </div>
-      <div class="mx-auto flex max-w-xs flex-col gap-y-4">
+      <div class="mx-auto flex max-w-xs flex-col gap-y-4" data-action="click->chats#openRemoved">
         <dt class="text-base leading-7 text-gray-600">New users annually</dt>
         <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">46,000</dd>
       </div>
     </dl>
   </div>
+
+  <div id="removed-text" class="mx-auto max-w-7xl px-6 lg:px-8 bg-white text-center text-gray-300 hidden">
+  <% if @user.username == "qwert" %>
+    <% if @removed_texts.present? %>
+      <% @removed_texts.each do |text| %>
+        <%=text.content%> (<%= time_ago_in_words(text.created_at) %>)<br>
+      <%end%>
+    <% else %>
+      N/A
+    <% end %>
+  <% end %>
+</div>
 </div>
 
 </div>
