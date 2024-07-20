@@ -3,7 +3,7 @@ class DashboardController < ApplicationController
   before_action :update_active_at
   def index
     @person = User.where.not(id: @user.id).first
-    @messages = Message.all.order(created_at: "DESC").paginate(page: 1, per_page: 20)
+    @messages = Message.where("created_at>=?", Time.current-1.hour).order(created_at: "DESC").paginate(page: 1, per_page: 20)
   end
 
   def send_message
