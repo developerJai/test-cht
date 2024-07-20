@@ -36,15 +36,11 @@ export default class extends Controller {
   }
 
   openRemoved(){
-    try {
-      let removedBox = document.getElementById("removed-text")
-      if(removedBox.classList.contains("hidden")){
-        removedBox.classList.remove("hidden")
-      }else{
-        removedBox.classList.add("hidden")
-      }
-    }catch(){
-      
+    let removedBox = document.getElementById("removed-text")
+    if (removedBox.classList.contains("hidden")) {
+      removedBox.classList.remove("hidden")
+    } else {
+      removedBox.classList.add("hidden")
     }
   }
 
@@ -74,7 +70,6 @@ export default class extends Controller {
         credentials: 'same-origin'
       }).then(response => response.json())
         .then(result => {
-          console.log(result);
 
           if(result.code == 200){
 
