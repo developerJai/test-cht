@@ -72,6 +72,7 @@ export default class extends Controller {
         .then(result => {
           msgBtn.classList.remove("hidden")
           if(result.code == 200){
+            msgBox.value = ""
             this.checkFunction()
           }
       }).catch(error => {
