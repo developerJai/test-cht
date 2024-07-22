@@ -12,20 +12,15 @@
                 <button type="submit" class="flex-none rounded-md bg-indigo-200 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-200" id="send-message" data-action="click->chats#sendMessage"><span aria-hidden="true">→</span></button>
               </div>
               <%= turbo_frame_tag "messages_list" do %>
-                <small class="text-right">⏱️ <%=@person.last_updated_at.present? ? time_ago_in_words(@person.last_updated_at) : 'N/A'%></small>
+                <small class="text-right">⏱️ <%=@person.last_updated_at.present? ? time_ago_in_words(@person.last_updated_at) : 'N/A'%> ago </small>
                 <div class="max-w-xl lg:max-w-lg max-h-80 overflow-y-scroll" id="message-container">
                   <% @messages.each do |msg| %>
-                    <div class="flex items-start gap-2.5 mt-1" attr-msg="msg-time-<%=msg.id%>" data-action="click->chats#messageTimestamp">
-                      <% if msg.user_id != @user.id %>
-                       <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                           <span class="text-sm font-semibold text-gray-900 dark:text-white">*</span>
-                        </div>
-                      <% end %>
+                    <div class="flex items-start mt-1" attr-msg="msg-time-<%=msg.id%>" data-action="click->chats#messageTimestamp">
                        <div class="flex flex-col w-full max-w-[320px] leading-1.5 p-1 border-gray-200 bg-gray-<%= msg.user_id == @user.id ? '20 text-right' : '100'%> rounded-e-xl rounded-es-xl dark:bg-gray-700">
-                          <p class="text-sm font-normal py-2.5 text-gray-900 dark:text-white">
+                          <div class="text-sm font-normal text-gray-900 dark:text-white">
                             <%=msg.content%> <br>
                             <small id="msg-time-<%=msg.id%>" class="hidden"><%=time_ago_in_words(msg.created_at)%> ago</small>
-                          </p>
+                          </div>
                        </div>
                     </div>
                   <%end%>
