@@ -15,7 +15,7 @@ export default class extends Controller {
     });
 
     this.interval = setInterval(() => {
-        this.checkFunction();
+        this.loadMessages();
     }, 3000);
   }
 
@@ -28,7 +28,7 @@ export default class extends Controller {
     let modal = document.getElementById("chat-modal")
     if(modal.classList.contains("hidden")){
       modal.classList.remove("hidden")
-      this.scrollMsgsBtm()
+      this.checkFunction()
     }else{
       modal.classList.add("hidden")
     }
@@ -70,23 +70,10 @@ export default class extends Controller {
         credentials: 'same-origin'
       }).then(response => response.json())
         .then(result => {
-
-          if(result.code == 200){
-
-            let msgList = document.getElementById("message-container")
-
-            var newParagraph = document.createElement('p');
-
-            // Set the class and content for the paragraph
-            newParagraph.className = 'leading-8 text-sm text-gray-400 bg-gray-20 text-right';
-            newParagraph.textContent = result.msg;
-
-            msgList.insertBefore(newParagraph, msgList.firstChild);
-
-            msgBox.value = ""
-            this.scrollMsgsBtm()
-          }
           msgBtn.classList.remove("hidden")
+          if(result.code == 200){
+            this.checkFunction()
+          }
       }).catch(error => {
         console.error('Error fetching data:', error);
        msgBtn.classList.remove("hidden")
@@ -114,6 +101,27 @@ export default class extends Controller {
         msgFrame.src = '/dash';
         msgFrame.reload();
         this.scrollMsgsBtm()
+    }
+  }
+
+  loadMessages(){
+    let indicator = document.getElementById("new-message-indicator")
+    if(indicator.value == "true") {
+      indicator.value = "false"
+      const msgFrame = document.getElementById("messages_list");
+      msgFrame.src = '/dash';
+      msgFrame.reload();
+      this.scrollMsgsBtm()
+    }
+  }
+
+  messageTimestamp(){
+    const msgTimeDivId = event.currentTarget.getAttribute("attr-msg")
+    const msgTimeDiv = document.getElementById(msgTimeDivId)
+    if (msgTimeDiv.classList.contains("hidden")) {
+      msgTimeDiv.classList.remove("hidden")
+    } else {
+      msgTimeDiv.classList.add("hidden")
     }
   }
 }
