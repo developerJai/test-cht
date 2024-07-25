@@ -44,6 +44,13 @@ class DashboardController < ApplicationController
     render json: { code: 200, message: "saved" }
   end
 
+  def remove_msg
+    if params[:from].present? && params[:to].present?
+      @user.messages.where("id >= ? and id <=?", params[:from], params[:to]).destroy_all
+    end
+    redirect_to dashboard_path
+  end
+
   protected
   def update_active_at
     @user.update(last_updated_at: Time.now)

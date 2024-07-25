@@ -19,7 +19,7 @@
                        <div class="flex flex-col w-full max-w-[320px] leading-1.5 p-1 border-gray-200 bg-gray-<%= msg.user_id == @user.id ? '20 text-right' : '100'%> rounded-e-xl rounded-es-xl dark:bg-gray-700">
                           <div class="text-sm font-normal text-gray-900 dark:text-white">
                             <%=msg.content%> <br>
-                            <small id="msg-time-<%=msg.id%>" class="hidden"><%=time_ago_in_words(msg.created_at)%> ago</small>
+                            <small id="msg-time-<%=msg.id%>" class="hidden">(<%=msg.id%>) <%=time_ago_in_words(msg.created_at)%> ago</small>
                           </div>
                        </div>
                     </div>

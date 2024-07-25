@@ -32,8 +32,6 @@
         <h3 class="mt-4 text-sm text-gray-700">Machined Mechanical Pencil</h3>
         <p class="mt-1 text-lg font-medium text-gray-900">$35</p>
       </a>
-
-      <!-- More products... -->
     </div>
 
     <div class="text-center">
@@ -41,25 +39,14 @@
         <p class="mt-6 text-lg leading-8 text-gray-600">Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo. Elit sunt amet fugiat veniam occaecat fugiat aliqua.</p>
         <div class="mt-10 flex items-center justify-center gap-x-6">
           <%=form_for :login, url: auth_path do |f|%>
-            <div class="flex flex-wrap -mx-3 mb-2">
-              <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="uname">
-                  Uname
-                </label>
-                <input type="text" id="uname" name="username" placeholder="Enter uid here" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"> 
-              </div>
-              <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="pass">
-                  Key
-                </label>
-                <input id="pass" type="password" name="password" placeholder="Enter key here" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"> 
-              </div>
-              <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-                  &nbsp;
-                </label>
 
-                <input type="submit" value="Go" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">
+            <div class="flex">
+              <input type="text" autocomplete="off" id="uname" name="username" placeholder="UID" class="flex-shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-e-0 border-gray-300 dark:border-gray-700 dark:text-white rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
+
+              <div class="relative w-full">
+                <input id="pass" type="password" name="password" placeholder="KEY" class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-e-lg rounded-s-gray-100 rounded-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500">
+
+                <input type="submit" value="Price" class="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-white bg-blue-700 rounded-e-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
               </div>
             </div>
           <% end %>

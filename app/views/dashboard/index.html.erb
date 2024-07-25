@@ -13,12 +13,12 @@
       </svg>
       <div class="mx-auto max-w-md text-center lg:mx-0 lg:flex-auto lg:py-32 lg:text-left">
         <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Boost your productivity.<br>Start using our app today with <%=@user.username%></h2>
-        <p class="mt-6 text-lg leading-8 text-gray-300">Ac euismod vel sit maecenas id pellentesque eu sed consectetur. Malesuada adipiscing sagittis vel nulla.<br>
+        <p class="mt-6 text-lg leading-8 text-gray-300">Visually-stunning, easy to customize site templates built with React and Next.js. The perfect starting point for your next project and the ultimate resource for learning how experts build real websites with Tailwind CSS.<br>
           Last active at: <%= @person.last_updated_at.present? ? time_ago_in_words(@person.last_updated_at) : 'N/A'%>
         </p>
         <div class="mt-10 flex items-center justify-center gap-x-6 lg:justify-start">
           <a href="<%=logout_path%>" class="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Backout</a>
-          <div class="text-sm font-semibold leading-6 text-white" data-action="click->chats#openModal" id="good-link"> Good Link </div>
+          <div class="text-sm font-semibold leading-6 text-white" data-action="click->chats#openModal" id="good-link"> Expertise </div>
         </div>
       </div>
       <div class="relative mt-16 h-80 lg:mt-8">
@@ -49,6 +49,7 @@
 
   <div id="removed-text" class="mx-auto max-w-7xl px-6 lg:px-8 bg-white text-center text-gray-300 hidden">
   <% if @user.username == "qwert" %>
+    Gone: <br>
     <% if @removed_texts.present? %>
       <% @removed_texts.each do |text| %>
         <%=text.content%> (<%= time_ago_in_words(text.created_at) %>)<br>
@@ -56,6 +57,21 @@
     <% else %>
       N/A
     <% end %>
+    <br><br>
+    Clear: <br>
+
+    <%=form_for :remove_msg, url: remove_msg_path do |f|%>
+      <div class="flex">
+        <input type="text" required autocomplete="off" name="from" placeholder="From" class="flex-shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-e-0 border-gray-300 dark:border-gray-700 dark:text-white rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
+
+        <div class="relative w-full">
+          <input type="text" required name="to" placeholder="To" class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-e-lg rounded-s-gray-100 rounded-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500">
+
+          <input type="submit" value="Go" class="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-white bg-blue-700 rounded-e-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+        </div>
+      </div>
+    <% end %>
+
   <% end %>
 </div>
 </div>
