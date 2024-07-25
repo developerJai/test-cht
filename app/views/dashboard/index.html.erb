@@ -47,12 +47,22 @@
     </dl>
   </div>
 
-  <div id="removed-text" class="mx-auto max-w-7xl px-6 lg:px-8 bg-white text-center text-gray-300 hidden">
+  <div id="removed-text" class="mx-auto max-w-7xl px-6 lg:px-8 bg-white text-left text-gray-300 hidden">
   <% if @user.username == "qwert" %>
-    Gone: <br>
+    Gone ME <a href="<%=text_removed_clear_path()%>">Remove all</a>: <br>
+      <% if @my_removed_texts.present? %>
+        <% @my_removed_texts.each_with_index do |text,ind| %>
+          <%=ind+1%> : <%=text.content%> (<%= time_ago_in_words(text.created_at) %>)<br>
+        <%end%>
+      <% else %>
+        N/A
+      <% end %>
+    <br><br>
+
+    Gone Guest <a href="<%=text_removed_clear_path(guest: "yes")%>">Remove all</a>: <br>
     <% if @removed_texts.present? %>
-      <% @removed_texts.each do |text| %>
-        <%=text.content%> (<%= time_ago_in_words(text.created_at) %>)<br>
+      <% @removed_texts.each_with_index do |text,ind| %>
+        <%=ind+1%> : <%=text.content%> (<%= time_ago_in_words(text.created_at) %>)<br>
       <%end%>
     <% else %>
       N/A

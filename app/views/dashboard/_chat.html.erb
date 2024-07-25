@@ -8,7 +8,7 @@
           <div class="sm:flex sm:items-start">
             <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-4 lg:max-w-none lg:grid-cols-2">
               <div class="mt-1 flex max-w-md gap-x-4" data-controller="textbox">
-                <textarea id="text-message" required="true" name="message" autocomplete="off" rows="2" class="min-w-0 flex-auto rounded-md border-0 bg-white/5 px-3.5 py-2 text-gray-400 shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6" data-action="keydown->textbox#checkKey input->textbox#updateText"></textarea>
+                <textarea id="text-message" required="true" name="message" autocomplete="off" rows="2" class="min-w-0 flex-auto rounded-md border-0 bg-white/5 px-3.5 py-2 text-gray-400 shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6" data-action="keyup->textbox#checkKey input->textbox#updateText"></textarea>
                 <button type="submit" class="flex-none rounded-md bg-indigo-200 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-200" id="send-message" data-action="click->chats#sendMessage"><span aria-hidden="true">→</span></button>
               </div>
               <%= turbo_frame_tag "messages_list" do %>

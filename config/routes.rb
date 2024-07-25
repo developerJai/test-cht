@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   post "dash/text/removed" => "dashboard#text_removed"
 
   post "dash/msg/remove" => "dashboard#remove_msg", as: "remove_msg"
+  get "dash/text/removed/clear" => "dashboard#text_removed_clear", as: "text_removed_clear"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

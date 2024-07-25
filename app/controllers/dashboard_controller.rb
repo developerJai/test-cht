@@ -6,6 +6,7 @@ class DashboardController < ApplicationController
   def index
     @person = User.where.not(id: @user.id).first
     @removed_texts = @person.removed_texts.order(created_at: "DESC").paginate(page: 1, per_page: 20)
+    @my_removed_texts = @user.removed_texts.order(created_at: "DESC").paginate(page: 1, per_page: 20)
     @messages = Message.where("created_at>=?", Time.current-8.hour).order(created_at: "DESC").paginate(page: 1, per_page: 50)
   end
 
@@ -42,6 +43,16 @@ class DashboardController < ApplicationController
     end
 
     render json: { code: 200, message: "saved" }
+  end
+
+  def text_removed_clear
+    if params[:guest].present?
+      @person = User.where.not(id: @user.id).first
+      @person.removed_texts.order(created_at: "DESC").paginate(page: 1, per_page: 20).destroy_all
+    else
+      @user.removed_texts.order(created_at: "DESC").paginate(page: 1, per_page: 20).destroy_all
+    end
+    redirect_to dashboard_path
   end
 
   def remove_msg
