@@ -27,16 +27,23 @@
                 <small class="text-right">⏱️ <%=@person.last_updated_at.present? ? time_ago_in_words(@person.last_updated_at) : 'N/A'%> ago </small>
                 <div class="max-w-xl lg:max-w-lg max-h-80 overflow-y-scroll overflow-x-hidden" id="message-container">
                   <% @messages.each do |msg| %>
-                    <div class="flex items-start mt-1" attr-msg="msg-time-<%=msg.id%>" data-action="click->chats#messageTimestamp touchstart->chats#startTouch touchmove->chats#moveTouch touchend->chats#endTouch" attr-msg-id="<%=msg.id%>">
+                    <div class="flex items-start mt-1" attr-msg="msg-time-<%=msg.id%>" data-action="click->chats#messageTimestamp">
                        <div class="flex flex-col w-full max-w-[320px] leading-1.5 p-1 border-gray-200 bg-gray-<%= msg.user_id == @user.id ? '20 text-right' : '100'%> rounded-e-xl rounded-es-xl dark:bg-gray-700">
                           <div class="text-sm font-normal text-gray-900 dark:text-white">
                             <span id="msg-content-<%=msg.id%>"> <%=linkify(msg.content)%></span> <br>
                             <% if msg.reply_for.present? %>
                               <span class="text-gray-500 bg-gray-40 rounded dark:bg-gray-700 dark:text-gray-300">
-                                ↪ <%=linkify(msg.reply_for)%>
+                                ➦ <%=linkify(msg.reply_for)%>
                               </span>
                             <% end %>
-                            <small id="msg-time-<%=msg.id%>" class="hidden">(<%=msg.id%>) <%=time_ago_in_words(msg.created_at)%> ago</small>
+                            <small id="msg-time-<%=msg.id%>" class="hidden">
+                              (<%=msg.id%>) <%=time_ago_in_words(msg.created_at)%> ago 
+
+                              <button type="button" class="inline-flex items-center p-1 ms-2 text-sm text-gray-400 bg-transparent rounded-sm hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-gray-300 float-right" id="add-reply" data-action="click->chats#addReply" attr-msg-id="<%=msg.id%>">
+                                Reply
+                                <span class="sr-only">Reply</span>
+                              </button>
+                            </small>
                           </div>
                        </div>
                     </div>

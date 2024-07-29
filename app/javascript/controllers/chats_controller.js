@@ -135,63 +135,12 @@ export default class extends Controller {
     }
   }
 
-
-  startTouch(event) {
-    this.touchStartX = event.changedTouches[0].clientX;
-    this.touchStartY = event.changedTouches[0].clientY;
-  }
-
-  moveTouch(event) {
-    event.preventDefault(); // Prevent scrolling
-    this.touchCurrentX = event.changedTouches[0].clientX;
-    this.touchCurrentY = event.changedTouches[0].clientY;
-
-    const deltaX = this.touchCurrentX - this.touchStartX;
-    const deltaY = this.touchCurrentY - this.touchStartY;
-
-    Array.from(event.currentTarget.children).forEach(child => {
-      child.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-    });
-  }
-
-  endTouch() {
-    this.handleSwipe();
-    // Reset position with transition
-    Array.from(event.currentTarget.children).forEach(child => {
-      child.style.transition = 'transform 0.3s ease';
-      child.style.transform = 'translate(0, 0)';
-
-      // Remove the transition after it's done to allow for smooth subsequent drags
-      setTimeout(() => {
-        child.style.transition = '';
-      }, 300);
-    });
-  }
-
-   handleSwipe() {
-    const deltaX = this.touchEndX - this.touchStartX;
-    const deltaY = this.touchEndY - this.touchStartY;
-
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      // if (deltaX > 50) {
-      //   console.log("Swiped right");
-      // } else if (deltaX < -50) {
-      //   console.log("Swiped left");
-      // }
-
-        const replyMsgId= event.currentTarget.getAttribute("attr-msg-id")
-        const replyMsgContent = document.getElementById('msg-content-'+replyMsgId).innerText
-        document.getElementById("reply-to-id").value = replyMsgId
-        document.getElementById("reply-to").innerText = "Reply to: " +  (replyMsgContent.length > 60 ? replyMsgContent.substring(0,60)+"..." : replyMsgContent)
-        document.getElementById('reply-msg-box').classList.remove("hidden")
-
-    } else {
-      if (deltaY > 50) {
-        console.log("Swiped down");
-      } else if (deltaY < -50) {
-        console.log("Swiped up");
-      }
-    }
+  addReply(){
+    const replyMsgId= event.currentTarget.getAttribute("attr-msg-id")
+    const replyMsgContent = document.getElementById('msg-content-'+replyMsgId).innerText
+    document.getElementById("reply-to-id").value = replyMsgId
+    document.getElementById("reply-to").innerText = "Reply to: " +  (replyMsgContent.length > 60 ? replyMsgContent.substring(0,60)+"..." : replyMsgContent)
+    document.getElementById('reply-msg-box').classList.remove("hidden")
   }
 
   removeReply(){
