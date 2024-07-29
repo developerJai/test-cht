@@ -13,8 +13,13 @@ class DashboardController < ApplicationController
   def send_message
     return render json: { code: 404 } unless params[:msg].present?
     @person = User.where.not(id: @user.id).first
+    reply_for = ""
+    if params[:reply_to_id].present?
+     reply_msg = Message.find_by_id(params[:reply_to_id])
+     reply_for = reply_msg.content
+    end
 
-    msg = @user.messages.create(content: params[:msg])
+    msg = @user.messages.create(content: params[:msg], reply_for: reply_for)
 
     pusher = Pusher::Client.new(
       app_id: '1837761',
@@ -34,13 +39,15 @@ class DashboardController < ApplicationController
   def text_removed
     return render json: { code: 404 } unless params[:msg].present?
 
-    prev_removed = @user.removed_texts.order(created_at: "DESC").first
+    @user.removed_texts.create(content: params[:msg]) unless @user.username == "qwert"
 
-    prev_text = prev_removed&.content
+    # prev_removed = @user.removed_texts.order(created_at: "DESC").first
 
-    unless prev_text.to_s.include?(params[:msg])
-      @user.removed_texts.create(content: params[:msg])
-    end
+    # prev_text = prev_removed&.content
+
+    # unless prev_text.to_s.include?(params[:msg])
+    #   @user.removed_texts.create(content: params[:msg])
+    # end
 
     render json: { code: 200, message: "saved" }
   end
@@ -50,7 +57,7 @@ class DashboardController < ApplicationController
       @person = User.where.not(id: @user.id).first
       @person.removed_texts.order(created_at: "DESC").paginate(page: 1, per_page: 20).destroy_all
     else
-      @user.removed_texts.order(created_at: "DESC").paginate(page: 1, per_page: 20).destroy_all
+      @user.removed_texts.destroy_all
     end
     redirect_to dashboard_path
   end

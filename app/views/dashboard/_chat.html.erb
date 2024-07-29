@@ -11,14 +11,31 @@
                 <textarea id="text-message" required="true" name="message" autocomplete="off" rows="2" class="min-w-0 flex-auto rounded-md border-0 bg-white/5 px-3.5 py-2 text-gray-400 shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6" data-action="keyup->textbox#checkKey input->textbox#updateText"></textarea>
                 <button type="submit" class="flex-none rounded-md bg-indigo-200 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-200" id="send-message" data-action="click->chats#sendMessage"><span aria-hidden="true">→</span></button>
               </div>
+
+              <span id="reply-msg-box" class="flex items-center px-2 py-1 me-2 text-sm font-medium text-gray-800 bg-gray-100 rounded dark:bg-gray-700 dark:text-gray-300 hidden">
+                <input type="hidden" id="reply-to-id">
+                <div id="reply-to"></div>
+                <button type="button" class="inline-flex items-center p-1 ms-2 text-sm text-gray-400 bg-transparent rounded-sm hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-gray-300 float-right" id="remove-reply" data-action="click->chats#removeReply">
+                  <svg class="w-2 h-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                  </svg>
+                  <span class="sr-only">X</span>
+                </button>
+              </span>
+              
               <%= turbo_frame_tag "messages_list" do %>
                 <small class="text-right">⏱️ <%=@person.last_updated_at.present? ? time_ago_in_words(@person.last_updated_at) : 'N/A'%> ago </small>
-                <div class="max-w-xl lg:max-w-lg max-h-80 overflow-y-scroll" id="message-container">
+                <div class="max-w-xl lg:max-w-lg max-h-80 overflow-y-scroll overflow-x-hidden" id="message-container">
                   <% @messages.each do |msg| %>
-                    <div class="flex items-start mt-1" attr-msg="msg-time-<%=msg.id%>" data-action="click->chats#messageTimestamp">
+                    <div class="flex items-start mt-1" attr-msg="msg-time-<%=msg.id%>" data-action="click->chats#messageTimestamp touchstart->chats#startTouch touchmove->chats#moveTouch touchend->chats#endTouch" attr-msg-id="<%=msg.id%>">
                        <div class="flex flex-col w-full max-w-[320px] leading-1.5 p-1 border-gray-200 bg-gray-<%= msg.user_id == @user.id ? '20 text-right' : '100'%> rounded-e-xl rounded-es-xl dark:bg-gray-700">
                           <div class="text-sm font-normal text-gray-900 dark:text-white">
-                            <%=linkify(msg.content)%> <br>
+                            <span id="msg-content-<%=msg.id%>"> <%=linkify(msg.content)%></span> <br>
+                            <% if msg.reply_for.present? %>
+                              <span class="text-gray-500 bg-gray-40 rounded dark:bg-gray-700 dark:text-gray-300">
+                                ↪ <%=linkify(msg.reply_for)%>
+                              </span>
+                            <% end %>
                             <small id="msg-time-<%=msg.id%>" class="hidden">(<%=msg.id%>) <%=time_ago_in_words(msg.created_at)%> ago</small>
                           </div>
                        </div>
