@@ -2,13 +2,35 @@
   <div class="inset-0 transition-opacity" aria-hidden="true"></div>
 
   <div class="inset-0 z-10 w-screen overflow-y-auto">
+
     <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
       <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+          <%= form_for :file, url: upload_img_path, html: { multipart: true } do |f| %>
+            <div class="mt-1 flex max-w-md gap-x-4" data-controller="textbox">
+              <label for="file-input">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-upload" viewBox="0 0 16 16">
+                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                    <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"/>
+                  </svg>
+
+                  <input id="file-input" name="image" class="hidden" type="file" data-action="change->chats#filePreview" accept="image/*" required/>
+              </label>
+              <img src="" name="file" id="selected-image" width="100">
+              <div id="img-btns" class="hidden">
+                <div id="clear-image-btn" class="flex-none rounded-md bg-grey-200 px-3.5 py-2.5 text-sm font-semibold text-black shadow-sm hover:bg-grey-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-grey-200" data-action="click->chats#clearImg"> Clear </div>
+                <hr>
+                <div id="send-message"></div>
+                <input type="submit" id="submit-image-btn" class="flex-none rounded-md bg-indigo-200 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-200" value="Send" data-action="click->chats#sendImage">
+              </div>
+            </div>
+          <% end %>
+
           <div class="sm:flex sm:items-start">
             <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-4 lg:max-w-none lg:grid-cols-2">
               <div class="mt-1 flex max-w-md gap-x-4" data-controller="textbox">
                 <textarea id="text-message" required="true" name="message" autocomplete="off" rows="2" class="min-w-0 flex-auto rounded-md border-0 bg-white/5 px-3.5 py-2 text-gray-400 shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6" data-action="keyup->textbox#checkKey input->textbox#updateText"></textarea>
+
                 <button type="submit" class="flex-none rounded-md bg-indigo-200 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-200" id="send-message" data-action="click->chats#sendMessage"><span aria-hidden="true">→</span></button>
               </div>
 
@@ -30,12 +52,24 @@
                     <div class="flex items-start mt-1" attr-msg="msg-time-<%=msg.id%>" data-action="click->chats#messageTimestamp">
                        <div class="flex flex-col w-full max-w-[320px] leading-1.5 p-1 border-gray-200 bg-gray-<%= msg.user_id == @user.id ? '20 text-right' : '100'%> rounded-e-xl rounded-es-xl dark:bg-gray-700">
                           <div class="text-sm font-normal text-gray-900 dark:text-white">
-                            <span id="msg-content-<%=msg.id%>"> <%=linkify(msg.content)%></span> <br>
                             <% if msg.reply_for.present? %>
                               <span class="text-gray-500 bg-gray-40 rounded dark:bg-gray-700 dark:text-gray-300">
                                 ➦ <%=linkify(msg.reply_for)%>
-                              </span>
+                              </span><br>
                             <% end %>
+                            <% if msg.image.present? %>
+                              <span id="msg-content-<%=msg.id%>" class="<%= msg.user_id == @user.id ? 'float-right' : '' %>" data-modal-target="image-modal-<%=msg.id%>" data-action="click->chats#openImageModal"> 
+                                <%#=linkify(msg.content)%>
+                                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                  <path fill-rule="evenodd" d="M13 10a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H14a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
+                                  <path fill-rule="evenodd" d="M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12c0 .556-.227 1.06-.593 1.422A.999.999 0 0 1 20.5 20H4a2.002 2.002 0 0 1-2-2V6Zm6.892 12 3.833-5.356-3.99-4.322a1 1 0 0 0-1.549.097L4 12.879V6h16v9.95l-3.257-3.619a1 1 0 0 0-1.557.088L11.2 18H8.892Z" clip-rule="evenodd"/>
+                                </svg>
+                              </span>
+                              <%= render partial: 'image', locals: { msg: msg } %>
+                            <%else%>
+                              <span id="msg-content-<%=msg.id%>"> <%=linkify(msg.content)%></span> 
+                            <%end%>
+
                             <small id="msg-time-<%=msg.id%>" class="hidden">
                               (<%=msg.id%>) <%=time_ago_in_words(msg.created_at)%> ago 
 
@@ -60,4 +94,3 @@
     </div>
   </div>
 </div>
-

@@ -15,7 +15,6 @@ class DashboardController < ApplicationController
 
     data = Base64.decode64(params[:encrypted_data])
 
-    @person = User.where.not(id: @user.id).first
     reply_for = ""
     if params[:reply_to_id].present?
      reply_msg = Message.find_by_id(params[:reply_to_id])
@@ -24,17 +23,7 @@ class DashboardController < ApplicationController
 
     msg = @user.messages.create(content: data, reply_for: reply_for)
 
-    pusher = Pusher::Client.new(
-      app_id: '1837761',
-      key: '268265a228eff4a444d7',
-      secret: '783930a173d076704261',
-      cluster: 'ap2',
-      encrypted: true
-    )
-
-    pusher.trigger("my-channel-#{@person.id}", "my-event", {
-      message: 'new'
-    })
+    send_pusher
 
     render json: {code: 200, message: "Send", msg: msg.content }
   end
@@ -72,8 +61,33 @@ class DashboardController < ApplicationController
     redirect_to dashboard_path
   end
 
+  def upload_img
+    if params[:image].present?
+      cloud = Cloudinary::Uploader.upload(params[:image], folder: @user.username)
+      msg = @user.messages.create(content: "Image", image: cloud["secure_url"])
+      send_pusher
+    end
+    redirect_to dashboard_path
+  end
+
   protected
   def update_active_at
     @user.update(last_updated_at: Time.now)
+  end
+
+  def send_pusher
+    @person = User.where.not(id: @user.id).first
+
+    pusher = Pusher::Client.new(
+      app_id: '1837761',
+      key: '268265a228eff4a444d7',
+      secret: '783930a173d076704261',
+      cluster: 'ap2',
+      encrypted: true
+    )
+
+    pusher.trigger("my-channel-#{@person.id}", "my-event", {
+      message: 'new'
+    })
   end
 end

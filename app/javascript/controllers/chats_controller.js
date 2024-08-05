@@ -143,11 +143,45 @@ export default class extends Controller {
     document.getElementById("reply-to-id").value = replyMsgId
     document.getElementById("reply-to").innerText = "Reply to: " +  (replyMsgContent.length > 60 ? replyMsgContent.substring(0,60)+"..." : replyMsgContent)
     document.getElementById('reply-msg-box').classList.remove("hidden")
+    this.scrollMsgsBtm()
   }
 
   removeReply(){
     document.getElementById('reply-msg-box').classList.add("hidden")
     document.getElementById('reply-to-id').value = ""
     document.getElementById('reply-to').value = ""
+    this.scrollMsgsBtm()
+  }
+
+  clearImg(){
+    var output = document.getElementById('selected-image');
+    output.src = ""
+    document.getElementById("file-input").value = ""
+    document.getElementById("img-btns").classList.add("hidden")
+  }
+
+  filePreview(){
+    var output = document.getElementById('selected-image');
+    output.src = URL.createObjectURL(event.target.files[0]);
+    console.log(document.getElementById("img-btns").classList)
+    document.getElementById("img-btns").classList.remove("hidden")
+    output.onload = function() {
+      URL.revokeObjectURL(output.src) // free memory
+    }
+  }
+
+  sendImage(){
+    document.getElementById("send-message").innerText = "Uploading please wait..."
+  }
+
+  openImageModal(){
+    const modalId = event.currentTarget.getAttribute("data-modal-target")
+    console.log(modalId)
+    document.getElementById(modalId).classList.remove("hidden")
+  }
+
+  closeImageModal(){
+    const modalId = event.currentTarget.getAttribute("attr-modal")
+    document.getElementById(modalId).classList.add("hidden")
   }
 }
