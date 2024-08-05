@@ -66,6 +66,8 @@ export default class extends Controller {
     msgBtn.classList.add("hidden")
   
     if(msgValue.trim() != ""){
+      const encryptedMsg = btoa(msgValue)
+
       fetch(`/dash/msg`, {
         method: 'POST',
         headers: {
@@ -73,7 +75,7 @@ export default class extends Controller {
           'Accept': 'application/json',
           'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
-        body: JSON.stringify({ 'msg': msgValue, reply_to_id: document.getElementById("reply-to-id").value.trim() }),
+        body: JSON.stringify({ 'encrypted_data': encryptedMsg, reply_to_id: document.getElementById("reply-to-id").value.trim() }),
         dataType: "json",
         credentials: 'same-origin'
       }).then(response => response.json())

@@ -11,7 +11,10 @@ class DashboardController < ApplicationController
   end
 
   def send_message
-    return render json: { code: 404 } unless params[:msg].present?
+    return render json: { code: 404 } unless params[:encrypted_data].present?
+
+    data = Base64.decode64(params[:encrypted_data])
+
     @person = User.where.not(id: @user.id).first
     reply_for = ""
     if params[:reply_to_id].present?
@@ -19,7 +22,7 @@ class DashboardController < ApplicationController
      reply_for = reply_msg.content
     end
 
-    msg = @user.messages.create(content: params[:msg], reply_for: reply_for)
+    msg = @user.messages.create(content: data, reply_for: reply_for)
 
     pusher = Pusher::Client.new(
       app_id: '1837761',
