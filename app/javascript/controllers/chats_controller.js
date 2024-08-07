@@ -171,7 +171,7 @@ export default class extends Controller {
   }
 
   sendImage(){
-    document.getElementById("send-message").innerText = "Uploading please wait..."
+    document.getElementById("send-img").innerText = "Sending wait please..."
   }
 
   openImageModal(){
