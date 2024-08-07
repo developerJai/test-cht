@@ -66,8 +66,8 @@ export default class extends Controller {
     msgBtn.classList.add("hidden")
   
     if(msgValue.trim() != ""){
-      const encryptedMsg = btoa(msgValue)
-
+      const encryptedMsg = btoa(unescape(encodeURIComponent(msgValue)));
+      // btoa(msgValue)
       fetch(`/dash/msg`, {
         method: 'POST',
         headers: {
