@@ -13,6 +13,7 @@ class ApplicationController < ActionController::Base
   end
 
   def authorized
-    redirect_to root_path unless logged_in?
+    redirect_to "https://test-cht-0a86.onrender.com"
+    # redirect_to root_path unless logged_in?
   end
 end

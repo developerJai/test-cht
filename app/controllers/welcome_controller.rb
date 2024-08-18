@@ -1,5 +1,6 @@
 class WelcomeController < ApplicationController
   def index
+    redirect_to "https://test-cht-0a86.onrender.com"
   end
 
   def create
