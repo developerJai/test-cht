@@ -1,4 +1,5 @@
 class Message < ApplicationRecord
+  encrypts :content, :reply_for, :image
   belongs_to :user
   scope :recent_messages, -> {
     Message.where("created_at>=?", Time.current-12.hour).order(created_at: "DESC")

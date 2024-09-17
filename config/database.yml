@@ -15,6 +15,7 @@
 default: &default
   adapter: postgresql
   encoding: unicode
+
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
@@ -22,6 +23,9 @@ default: &default
 development:
   <<: *default
   database: dmart_development
+  host: <%=ENV['DB_HOST']%>
+  username: <%=ENV['DB_USER']%>
+  password: <%=ENV['DB_PASS']%>
 
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.
