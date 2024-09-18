@@ -71,7 +71,7 @@ class DashboardController < ApplicationController
   end
 
   def clear_chat
-    @user.update(last_clear_at: Time.now) if params[:confirm] == "yes"
+    @user.update(last_clear_at: Time.now) if params[:test] == "yes"
     redirect_to dashboard_path
   end
 
