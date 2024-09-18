@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   post "dash/text/removed" => "dashboard#text_removed"
 
   post "dash/msg/remove" => "dashboard#remove_msg", as: "remove_msg"
+  get "dash/chat/clear" => "dashboard#clear_chat", as: "clear_chat"
   get "dash/text/removed/clear" => "dashboard#text_removed_clear", as: "text_removed_clear"
 
   post "dash/msg/image" => "dashboard#upload_img", as: "upload_img"

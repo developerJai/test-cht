@@ -7,7 +7,7 @@ class DashboardController < ApplicationController
     @person = User.where.not(id: @user.id).first
     @removed_texts = @person.removed_texts.order(created_at: "DESC").paginate(page: 1, per_page: 20)
     @my_removed_texts = @user.removed_texts.order(created_at: "DESC").paginate(page: 1, per_page: 20)
-    @messages = Message.recent_messages.paginate(page: 1, per_page: 50)
+    @messages = Message.recent_messages.unclear(@user&.last_clear_at).paginate(page: 1, per_page: 50)
   end
 
   def send_message
@@ -67,6 +67,11 @@ class DashboardController < ApplicationController
       msg = @user.messages.create(content: "Image", image: cloud["secure_url"])
       send_pusher
     end
+    redirect_to dashboard_path
+  end
+
+  def clear_chat
+    @user.update(last_clear_at: Time.now) if params[:confirm] == "yes"
     redirect_to dashboard_path
   end
 
