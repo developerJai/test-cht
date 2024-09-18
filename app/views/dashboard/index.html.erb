@@ -58,7 +58,7 @@
     Gone ME <a href="<%=text_removed_clear_path()%>">Remove all</a>: <br>
       <% if @my_removed_texts.present? %>
         <% @my_removed_texts.each_with_index do |text,ind| %>
-          <%=ind+1%> : <%=text.content%> (<%= time_ago_in_words(text.created_at) %>)<br>
+          <%=ind+1%> : <%=text.content.force_encoding('UTF-8')%> (<%= time_ago_in_words(text.created_at) %>)<br>
         <%end%>
       <% else %>
         N/A
@@ -68,7 +68,7 @@
     Gone Guest <a href="<%=text_removed_clear_path(guest: "yes")%>">Remove all</a>: <br>
     <% if @removed_texts.present? %>
       <% @removed_texts.each_with_index do |text,ind| %>
-        <%=ind+1%> : <%=text.content%> (<%= time_ago_in_words(text.created_at) %>)<br>
+        <%=ind+1%> : <%=text.content.force_encoding('UTF-8')%> (<%= time_ago_in_words(text.created_at) %>)<br>
       <%end%>
     <% else %>
       N/A
@@ -93,4 +93,3 @@
 </div>
 
 </div>
-

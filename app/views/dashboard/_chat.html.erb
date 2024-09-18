@@ -54,7 +54,7 @@
                           <div class="text-sm font-normal text-gray-900 dark:text-white">
                             <% if msg.reply_for.present? %>
                               <span class="text-gray-500 bg-gray-40 rounded dark:bg-gray-700 dark:text-gray-300">
-                                ➦ <%=linkify(msg.reply_for)%>
+                                ➦ <%=linkify(msg.reply_for.force_encoding('UTF-8'))%>
                               </span><br>
                             <% end %>
                             <% if msg.image.present? %>
@@ -67,7 +67,7 @@
                               </span>
                               <%= render partial: 'image', locals: { msg: msg } %>
                             <%else%>
-                              <span id="msg-content-<%=msg.id%>"> <%=linkify(msg.content)%></span> 
+                              <span id="msg-content-<%=msg.id%>"> <%=linkify(msg.content.force_encoding('UTF-8'))%></span> 
                             <%end%>
 
                             <small id="msg-time-<%=msg.id%>" class="hidden">
