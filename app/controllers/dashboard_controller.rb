@@ -21,11 +21,13 @@ class DashboardController < ApplicationController
      reply_for = reply_msg.content
     end
 
-    msg = @user.messages.create(content: data, reply_for: reply_for)
+    prev_msg = @user.messages.recent_messages.first
+
+    msg = @user.messages.create(content: data, reply_for: reply_for) if prev_msg&.content != data
 
     send_pusher
 
-    render json: {code: 200, message: "Send", msg: msg.content }
+    render json: {code: 200, message: "Send", msg: msg&.content }
   end
 
   def text_removed

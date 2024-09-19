@@ -40,7 +40,6 @@ export default class extends Controller {
     }else{
       modal.classList.add("hidden")
     }
-    
   }
 
   openRemoved(){
@@ -62,12 +61,13 @@ export default class extends Controller {
     const msgValue = msgBox.value
 
     let msgBtn = document.getElementById('send-message')
+    let msgSending = document.getElementById('sending-message')
 
     msgBtn.classList.add("hidden")
+    msgSending.classList.remove("hidden")
   
     if(msgValue.trim() != ""){
       const encryptedMsg = btoa(unescape(encodeURIComponent(msgValue)));
-      // btoa(msgValue)
       fetch(`/dash/msg`, {
         method: 'POST',
         headers: {
@@ -81,6 +81,7 @@ export default class extends Controller {
       }).then(response => response.json())
         .then(result => {
           msgBtn.classList.remove("hidden")
+          msgSending.classList.add("hidden")
           msgBox.value = ""
           this.removeReply()
           if(result.code == 200){
@@ -89,9 +90,11 @@ export default class extends Controller {
       }).catch(error => {
         console.error('Error fetching data:', error);
        msgBtn.classList.remove("hidden")
+       msgSending.classList.add("hidden")
       });
     } else {
       msgBtn.classList.remove("hidden")
+      msgSending.classList.add("hidden")
     }
   }
 
