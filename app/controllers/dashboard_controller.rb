@@ -65,12 +65,12 @@ class DashboardController < ApplicationController
 
   def upload_img
     if params[:image].present?
-      if file.content_type.start_with?('image')
+      if params[:image].content_type.start_with?('image')
         # Upload image to Cloudinary
-        cloud = Cloudinary::Uploader.upload(file, folder: @user.username)
-      elsif file.content_type.start_with?('video')
+        cloud = Cloudinary::Uploader.upload(params[:image], folder: @user.username)
+      elsif params[:image].content_type.start_with?('video')
         # Upload video to Cloudinary, specifying resource type as 'video'
-        cloud = Cloudinary::Uploader.upload(file, folder: @user.username, resource_type: 'video', chunk_size: 50_000_000)
+        cloud = Cloudinary::Uploader.upload(params[:image], folder: @user.username, resource_type: 'video', chunk_size: 50_000_000)
       else
         cloud["secure_url"] = nil
       end
