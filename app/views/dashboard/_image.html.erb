@@ -6,7 +6,15 @@
     </div>
     <div class="flex-grow p-4 overflow-auto">
       <!-- Modal content -->
-      <img src="<%=msg.image%>" style="width: 100%;">
+      <!-- Check if Cloudinary URL contains `/video/upload/`, which indicates a video -->
+      <% if msg.image.include?('/video/upload/') %>
+        <video id="video-<%= msg.id %>" controls playsinline muted style="width: 100%;">
+          <source src="<%= msg.image %>" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      <% else %>
+        <img src="<%= msg.image %>" alt="Image" style="width: 100%;"/>
+      <% end %>
     </div>
   </div>
 </div>

@@ -75,7 +75,10 @@ class DashboardController < ApplicationController
         cloud["secure_url"] = nil
       end
       msg = @user.messages.create(content: "Image", image: cloud["secure_url"]) if cloud["secure_url"].present?
-      send_pusher
+      begin
+        send_pusher
+      rescue => e
+      end
     end
     redirect_to dashboard_path
   end
