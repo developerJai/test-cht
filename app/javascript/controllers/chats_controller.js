@@ -13,6 +13,7 @@ export default class extends Controller {
     this.originalY = this.element.offsetTop;
 
     document.addEventListener('click', function(e){
+      console.log(e.target.getAttribute("id"))
       if (document.getElementById('chat-modal').contains(e.target)){
         // Clicked in box
       } else if(e.target.getAttribute("id") != "good-link"){
@@ -162,16 +163,6 @@ export default class extends Controller {
     document.getElementById("file-input").value = ""
     document.getElementById("img-btns").classList.add("hidden")
   }
-
-  // filePreview(){
-  //   var output = document.getElementById('selected-image');
-  //   output.src = URL.createObjectURL(event.target.files[0]);
-  //   console.log(document.getElementById("img-btns").classList)
-  //   document.getElementById("img-btns").classList.remove("hidden")
-  //   output.onload = function() {
-  //     URL.revokeObjectURL(output.src) // free memory
-  //   }
-  // }
 
   filePreview() {
     var file = event.target.files[0];
