@@ -214,6 +214,9 @@ export default class extends Controller {
 
   closeImageModal(){
     const modalId = event.currentTarget.getAttribute("attr-modal")
-    document.getElementById(modalId).classList.add("hidden")
+    const modalContains = event.currentTarget.getAttribute("attr-contains")
+    if(modalContains != "video"){
+      document.getElementById(modalId).classList.add("hidden")
+    }
   }
 }
