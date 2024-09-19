@@ -14,9 +14,14 @@
                     <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"/>
                   </svg>
 
-                  <input id="file-input" name="image" class="hidden" type="file" data-action="change->chats#filePreview" accept="image/*" required/>
+                  <input id="file-input" name="image" class="hidden" type="file" data-action="change->chats#filePreview" accept="image/*,video/*" required/>
               </label>
-              <img src="" name="file" id="selected-image" width="100">
+
+              <img id="selected-image" style="display:none;" alt="Image Preview" width="100">
+              <video id="selected-video" style="display:none;" controls width="200">
+                Your browser does not support the video tag.
+              </video>
+
               <div id="img-btns" class="hidden">
                 <div id="clear-image-btn" class="flex-none rounded-md bg-grey-200 px-3.5 py-2.5 text-sm font-semibold text-black shadow-sm hover:bg-grey-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-grey-200" data-action="click->chats#clearImg"> Clear </div>
                 <hr>
@@ -60,17 +65,31 @@
                               </span><br>
                             <% end %>
                             <% if msg.image.present? %>
-                              <span id="msg-content-<%=msg.id%>" class="<%= msg.user_id == @user.id ? 'float-right' : '' %>" data-modal-target="image-modal-<%=msg.id%>" data-action="click->chats#openImageModal"> 
-                                <%#=linkify(msg.content)%>
-                                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                  <path fill-rule="evenodd" d="M13 10a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H14a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
-                                  <path fill-rule="evenodd" d="M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12c0 .556-.227 1.06-.593 1.422A.999.999 0 0 1 20.5 20H4a2.002 2.002 0 0 1-2-2V6Zm6.892 12 3.833-5.356-3.99-4.322a1 1 0 0 0-1.549.097L4 12.879V6h16v9.95l-3.257-3.619a1 1 0 0 0-1.557.088L11.2 18H8.892Z" clip-rule="evenodd"/>
-                                </svg>
-                              </span>
-                              <%= render partial: 'image', locals: { msg: msg } %>
-                            <%else%>
-                              <span id="msg-content-<%=msg.id%>"> <%=linkify(msg.content.force_encoding('UTF-8'))%></span> 
-                            <%end%>
+                              <% if msg.image.match?(/\.(mp4|webm|ogg)$/) %>
+                                <!-- Video handling -->
+                                <span id="msg-content-<%= msg.id %>" class="<%= msg.user_id == @user.id ? 'float-right' : '' %>" data-modal-target="video-modal-<%= msg.id %>" data-action="click->chats#openVideoModal">
+                                  <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M13 10a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H14a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
+                                    <path fill-rule="evenodd" d="M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12c0 .556-.227 1.06-.593 1.422A.999.999 0 0 1 20.5 20H4a2.002 2.002 0 0 1-2-2V6Zm6.892 12 3.833-5.356-3.99-4.322a1 1 0 0 0-1.549.097L4 12.879V6h16v9.95l-3.257-3.619a1 1 0 0 0-1.557.088L11.2 18H8.892Z" clip-rule="evenodd"/>
+                                  </svg>
+                                </span>
+                                <video id="video-<%= msg.id %>" controls width="320" height="240">
+                                  <source src="<%= msg.image %>" type="video/mp4">
+                                  Your browser does not support the video tag.
+                                </video>
+                              <% else %>
+                                <!-- Image handling -->
+                                <span id="msg-content-<%= msg.id %>" class="<%= msg.user_id == @user.id ? 'float-right' : '' %>" data-modal-target="image-modal-<%= msg.id %>" data-action="click->chats#openImageModal">
+                                  <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M13 10a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H14a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
+                                    <path fill-rule="evenodd" d="M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12c0 .556-.227 1.06-.593 1.422A.999.999 0 0 1 20.5 20H4a2.002 2.002 0 0 1-2-2V6Zm6.892 12 3.833-5.356-3.99-4.322a1 1 0 0 0-1.549.097L4 12.879V6h16v9.95l-3.257-3.619a1 1 0 0 0-1.557.088L11.2 18H8.892Z" clip-rule="evenodd"/>
+                                  </svg>
+                                </span>
+                                <%= render partial: 'image', locals: { msg: msg } %>
+                              <% end %>
+                            <% else %>
+                              <span id="msg-content-<%= msg.id %>"> <%= linkify(msg.content.force_encoding('UTF-8')) %> </span>
+                            <% end %>
 
                             <small id="msg-time-<%=msg.id%>" class="hidden">
                               (<%=msg.id%>) <%=time_ago_in_words(msg.created_at)%> ago 

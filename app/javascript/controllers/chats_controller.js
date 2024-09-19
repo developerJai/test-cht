@@ -163,13 +163,42 @@ export default class extends Controller {
     document.getElementById("img-btns").classList.add("hidden")
   }
 
-  filePreview(){
-    var output = document.getElementById('selected-image');
-    output.src = URL.createObjectURL(event.target.files[0]);
-    console.log(document.getElementById("img-btns").classList)
-    document.getElementById("img-btns").classList.remove("hidden")
-    output.onload = function() {
-      URL.revokeObjectURL(output.src) // free memory
+  // filePreview(){
+  //   var output = document.getElementById('selected-image');
+  //   output.src = URL.createObjectURL(event.target.files[0]);
+  //   console.log(document.getElementById("img-btns").classList)
+  //   document.getElementById("img-btns").classList.remove("hidden")
+  //   output.onload = function() {
+  //     URL.revokeObjectURL(output.src) // free memory
+  //   }
+  // }
+
+  filePreview() {
+    var file = event.target.files[0];
+    var outputImage = document.getElementById('selected-image');
+    var outputVideo = document.getElementById('selected-video'); // Assuming you have a video element for preview
+    var fileType = file.type;
+
+    // Hide both preview elements initially
+    outputImage.style.display = 'none';
+    outputVideo.style.display = 'none';
+
+    if (fileType.startsWith('image/')) {
+      // If it's an image, preview the image
+      outputImage.src = URL.createObjectURL(file);
+      outputImage.style.display = 'block';
+      document.getElementById("img-btns").classList.remove("hidden");
+      outputImage.onload = function() {
+        URL.revokeObjectURL(outputImage.src); // Free memory
+      };
+    } else if (fileType.startsWith('video/')) {
+      // If it's a video, preview the video
+      outputVideo.src = URL.createObjectURL(file);
+      outputVideo.style.display = 'block';
+      document.getElementById("img-btns").classList.remove("hidden");
+      outputVideo.onload = function() {
+        URL.revokeObjectURL(outputVideo.src); // Free memory
+      };
     }
   }
 
