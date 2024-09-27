@@ -94,18 +94,21 @@ class DashboardController < ApplicationController
   end
 
   def send_pusher
-    @person = User.where.not(id: @user.id).first
+    begin
+      @person = User.where.not(id: @user.id).first
 
-    pusher = Pusher::Client.new(
-      app_id: '1837761',
-      key: '268265a228eff4a444d7',
-      secret: '783930a173d076704261',
-      cluster: 'ap2',
-      encrypted: true
-    )
+      pusher = Pusher::Client.new(
+        app_id: '1837761',
+        key: '268265a228eff4a444d7',
+        secret: '783930a173d076704261',
+        cluster: 'ap2',
+        encrypted: true
+      )
 
-    pusher.trigger("my-channel-#{@person.id}", "my-event", {
-      message: 'new'
-    })
+      pusher.trigger("my-channel-#{@person.id}", "my-event", {
+        message: 'new'
+      })
+    rescue => e
+    end
   end
 end
