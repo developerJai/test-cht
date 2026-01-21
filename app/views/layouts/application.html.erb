@@ -20,6 +20,34 @@
       .message-link {
         color: #8f69b2;
       }
+      
+      /* Ensure minimum 16px font size for all inputs to prevent mobile zoom */
+      input[type="text"],
+      input[type="password"],
+      input[type="email"],
+      input[type="number"],
+      input[type="tel"],
+      input[type="url"],
+      input[type="search"],
+      textarea,
+      select {
+        font-size: 16px !important;
+      }
+      
+      /* For smaller screens, ensure it stays at 16px minimum */
+      @media (max-width: 640px) {
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        input[type="number"],
+        input[type="tel"],
+        input[type="url"],
+        input[type="search"],
+        textarea,
+        select {
+          font-size: 16px !important;
+        }
+      }
     </style>
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     <script>
