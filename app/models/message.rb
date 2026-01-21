@@ -4,7 +4,7 @@ class Message < ApplicationRecord
   belongs_to :recipient, class_name: 'User', optional: true
   
   scope :recent_messages, -> {
-    where("created_at>=?", Time.current-12.hour).order(created_at: "DESC")
+    where("created_at>=?", Time.current-24.hour).order(created_at: "DESC")
   }
 
   scope :unclear, -> (last_clear_at){
@@ -14,7 +14,7 @@ class Message < ApplicationRecord
   }
 
   scope :old_messages, -> {
-    where("created_at<?", Time.current-12.hour).order(created_at: "DESC")
+    where("created_at<?", Time.current-24.hour).order(created_at: "DESC")
   }
   scope :without_images, -> {
     where("image is null")
