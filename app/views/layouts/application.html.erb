@@ -59,10 +59,64 @@
         cluster: 'ap2'
       });
 
-      var channel = pusher.subscribe('my-channel-<%=@user&.id%>');
+      var channel = pusher.subscribe('my-channel-<%=@current_user&.id%>');
       channel.bind('my-event', function(data) {
-        let indicator = document.getElementById("new-message-indicator")
-        indicator.value = "true"
+        console.log('Pusher message received:', data);
+        
+        // Check if user is admin and if message is from a different user than currently selected
+        const isAdmin = <%= @current_user&.admin? || false %>;
+        const selectedUserId = <%= session[:selected_user_id] || 'null' %>;
+        const senderId = data.sender_id;
+        
+        if (isAdmin && selectedUserId && senderId) {
+          if (parseInt(selectedUserId) === parseInt(senderId)) {
+            // Message from currently active user - reload messages
+            let indicator = document.getElementById("new-message-indicator");
+            if (indicator) indicator.value = "true";
+          } else {
+            // Message from different user - update counter on their button
+            const userButton = document.querySelector(`a[data-user-id="${senderId}"]`);
+            if (userButton) {
+              let unseenBadge = userButton.querySelector('.unseen-badge');
+              if (unseenBadge) {
+                // Increment existing counter
+                let currentCount = parseInt(unseenBadge.getAttribute('data-count') || '0');
+                currentCount++;
+                unseenBadge.setAttribute('data-count', currentCount);
+                unseenBadge.textContent = currentCount;
+                // Add pulse animation if not already present
+                if (!unseenBadge.classList.contains('animate-pulse')) {
+                  unseenBadge.classList.add('animate-pulse');
+                }
+              } else {
+                // Create new counter badge
+                unseenBadge = document.createElement('span');
+                unseenBadge.className = 'unseen-badge ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-red-500 rounded-full animate-pulse';
+                unseenBadge.setAttribute('data-count', '1');
+                unseenBadge.textContent = '1';
+                userButton.appendChild(unseenBadge);
+              }
+            }
+          }
+        } else {
+          // Regular user - always reload messages
+          let indicator = document.getElementById("new-message-indicator");
+          if (indicator) indicator.value = "true";
+        }
+      });
+      
+      // Clear counter badge when admin clicks on user button
+      document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('click', function(e) {
+          const userButton = e.target.closest('a[data-user-id]');
+          if (userButton) {
+            // Remove the unseen message counter badge
+            const unseenBadge = userButton.querySelector('.unseen-badge');
+            if (unseenBadge) {
+              unseenBadge.remove();
+            }
+          }
+        });
       });
     </script>
   </head>
@@ -233,9 +287,8 @@
 
     <script>
       // PWA Installation - Capture install prompt early
-      let deferredPrompt = null;
+      let deferredPrompt;
 
-      // Listen for beforeinstallprompt event (must be registered early)
       window.addEventListener('beforeinstallprompt', (e) => {
         console.log('beforeinstallprompt event fired!');
         e.preventDefault();

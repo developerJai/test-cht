@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_20_141415) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_21_000005) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -21,6 +21,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_20_141415) do
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "recipient_id"
+    t.datetime "seen_by_admin_at"
+    t.index ["recipient_id", "seen_by_admin_at"], name: "index_messages_on_recipient_id_and_seen_by_admin_at"
+    t.index ["recipient_id", "user_id"], name: "index_messages_on_recipient_id_and_user_id"
+    t.index ["recipient_id"], name: "index_messages_on_recipient_id"
+    t.index ["seen_by_admin_at"], name: "index_messages_on_seen_by_admin_at"
+    t.index ["user_id", "recipient_id"], name: "index_messages_on_user_id_and_recipient_id"
     t.index ["user_id"], name: "index_messages_on_user_id"
   end
 
@@ -39,8 +46,14 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_20_141415) do
     t.datetime "last_clear_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_admin", default: false
+    t.string "name"
+    t.boolean "enabled", default: true
+    t.json "conversation_activities", default: {}
+    t.index ["enabled"], name: "index_users_on_enabled"
   end
 
   add_foreign_key "messages", "users"
+  add_foreign_key "messages", "users", column: "recipient_id"
   add_foreign_key "removed_texts", "users"
 end

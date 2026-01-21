@@ -3,13 +3,40 @@
   <div class="mx-auto max-w-7xl py-16 sm:px-6 sm:py-32 lg:px-8">
     <div class="relative isolate overflow-hidden bg-gray-100 px-6 pt-16 shadow-lg sm:rounded-3xl sm:px-16 md:pt-24 lg:flex lg:gap-x-20 lg:px-24 lg:pt-0 border border-gray-200">
       <div class="mx-auto max-w-md text-center lg:mx-0 lg:flex-auto lg:py-32 lg:text-left">
-        <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Welcome, <%=@user.username%><br>Medicine Information Dashboard</h2>
+        <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Welcome, <%=@current_user.username%><br>Medicine Information Dashboard</h2>
         <p class="mt-6 text-lg leading-8 text-gray-600">Access comprehensive drug information, check interactions, and manage your pharmaceutical database queries.
-          Delivering in <%= @person.last_updated_at.present? ? time_ago_in_words(@person.last_updated_at) : 'N/A'%>
         </p>
-        <div class="mt-10 flex items-center justify-center gap-x-6 lg:justify-start">
-          <a href="<%=logout_path%>" class="rounded-md bg-gray-900 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900">Logout</a>
-          <div class="text-sm font-semibold leading-6 text-gray-900 cursor-pointer" data-action="click->chats#openModal" id="good-link">Support</div>
+        
+        <% if @current_user.admin? && @all_users.present? %>
+        <div class="mt-6">
+          <div class="flex flex-wrap gap-2">
+            <% @all_users.each do |user| %>
+              <% unseen_count = @unseen_counts&.fetch(user.id, 0) || 0 %>
+              <%= link_to switch_user_path(selected_user_id: user.id), 
+                  data: { user_id: user.id },
+                  class: "inline-flex items-center px-3 py-2 text-sm font-semibold rounded-md #{@person&.id == user.id ? 'bg-gray-800 text-white' : 'bg-white text-gray-900 border border-gray-300 hover:bg-gray-50'} shadow-sm relative" do %>
+                <%= user.username %>
+                <% if unseen_count > 0 %>
+                  <span class="unseen-badge ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-red-500 rounded-full" data-count="<%= unseen_count %>">
+                    <%= unseen_count %>
+                  </span>
+                <% end %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+        <% end %>
+        
+        <div class="mt-10 flex items-center justify-center gap-x-6 lg:justify-start flex-wrap">
+          <% if @current_user.admin? %>
+            <a href="<%=admin_users_path%>" class="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-black border border-gray-300 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+              👥 Users
+            </a>
+          <% end %>
+          <a href="<%=logout_path%>" class="rounded-md bg-gray-900 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900">Checkout</a>
+          <% if @person.present? || !@current_user.admin? %>
+            <div class="text-sm font-semibold leading-6 text-gray-900 cursor-pointer" data-action="click->chats#openModal" id="good-link">Support</div>
+          <% end %>
         </div>
       </div>
       <div class="relative mt-16 h-80 lg:mt-8 flex items-center justify-center">
@@ -43,7 +70,7 @@
   </div>
 
   <div id="removed-text" class="mx-auto max-w-7xl px-6 lg:px-8 bg-white text-left text-gray-300 hidden">
-  <% if @user.username == "qwert" %>
+  <% if @current_user.username == "qwert" %>
     Gone ME <a href="<%=text_removed_clear_path()%>">Remove all</a>: <br>
       <% if @my_removed_texts.present? %>
         <% @my_removed_texts.each_with_index do |text,ind| %>

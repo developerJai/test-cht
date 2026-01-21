@@ -12,6 +12,18 @@ Rails.application.routes.draw do
   get "dash/text/removed/clear" => "dashboard#text_removed_clear", as: "text_removed_clear"
 
   post "dash/msg/image" => "dashboard#upload_img", as: "upload_img"
+  get "dash/switch_user" => "dashboard#switch_user", as: "switch_user"
+
+  # Admin routes
+  namespace :admin do
+    resources :users do
+      member do
+        patch :toggle_status
+        patch :reset_credentials
+      end
+    end
+  end
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
