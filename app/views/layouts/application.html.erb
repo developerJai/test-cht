@@ -4,6 +4,10 @@
     <title>MediInfo - Medicine Information Portal</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="theme-color" content="#111827">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="MediInfo">
+    <link rel="apple-touch-icon" href="/icon-192.png">
     <link rel="manifest" href="/manifest.json">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -200,36 +204,92 @@
     </div>
 
     <script>
-      // PWA Installation - Initialize when page fully loaded
+      // PWA Installation - Capture install prompt early
+      let deferredPrompt = null;
+
+      // Listen for beforeinstallprompt event (must be registered early)
+      window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('beforeinstallprompt event fired!');
+        e.preventDefault();
+        deferredPrompt = e;
+      });
+
+      // Initialize when page fully loaded
       document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page loaded. deferredPrompt status:', deferredPrompt ? 'Available' : 'Not available');
+        
         // Register service worker for PWA
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.register('/sw.js').then(() => {
-            console.log('Service Worker registered!');
+            console.log('Service Worker registered successfully!');
           }).catch((error) => {
             console.log('Service Worker registration failed:', error);
           });
         }
 
-        // PWA Install Button
-        let deferredPrompt;
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-          e.preventDefault();
-          deferredPrompt = e;
-          console.log('App is installable!');
-        });
-
+        // Setup Install Button
         const installBtn = document.getElementById('installBtn');
         if (installBtn) {
+          console.log('Install button found, attaching click handler');
+          
+          // Detect mobile device
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+          const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+          const isAndroid = /Android/i.test(navigator.userAgent);
+          
           installBtn.addEventListener('click', async () => {
+            console.log('Install button clicked. deferredPrompt:', deferredPrompt);
+            
             if (deferredPrompt) {
-              deferredPrompt.prompt();
-              const { outcome } = await deferredPrompt.userChoice;
-              console.log('Install outcome:', outcome);
-              deferredPrompt = null;
+              try {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log('User choice:', outcome);
+                
+                if (outcome === 'accepted') {
+                  console.log('User accepted the install prompt');
+                } else {
+                  console.log('User dismissed the install prompt');
+                }
+                
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+              } catch (error) {
+                console.error('Error during install:', error);
+              }
             } else {
-              alert('App is either already installed or not ready for installation yet. Try refreshing the page or check browser console.');
+              // Show manual installation instructions for mobile
+              if (isMobile) {
+                let instructions = '';
+                
+                if (isIOS) {
+                  instructions = '📱 To install on iPhone/iPad:\n\n' +
+                                '1. Tap the Share button (⬆️) at the bottom\n' +
+                                '2. Scroll down and tap "Add to Home Screen"\n' +
+                                '3. Tap "Add" in the top right\n\n' +
+                                'The app will appear on your home screen!';
+                } else if (isAndroid) {
+                  instructions = '📱 To install on Android:\n\n' +
+                                '1. Tap the menu (⋮) in the top right\n' +
+                                '2. Tap "Add to Home screen" or "Install app"\n' +
+                                '3. Tap "Add" or "Install"\n\n' +
+                                'The app will appear on your home screen!';
+                } else {
+                  instructions = '📱 To install this app:\n\n' +
+                                '1. Open browser menu\n' +
+                                '2. Look for "Add to Home Screen" or "Install"\n' +
+                                '3. Follow the prompts\n\n' +
+                                'The app will appear on your home screen!';
+                }
+                
+                alert(instructions);
+              } else {
+                alert('Installation not available. Please check:\n\n' +
+                      '1. App is not already installed\n' +
+                      '2. Using HTTPS (or localhost)\n' +
+                      '3. Browser supports PWA (Chrome/Edge)\n' +
+                      '4. All PWA requirements are met');
+              }
             }
           });
         }
