@@ -1,21 +1,23 @@
 <div class="bg-white min-h-screen">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
     <!-- Header -->
-    <div class="mb-8 flex items-center justify-between">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900">👥 User Management</h1>
-        <p class="mt-2 text-sm text-gray-600">Manage user accounts, passwords, and access</p>
-      </div>
-      <div class="flex gap-4">
-        <button onclick="openModal('createUserModal')" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-          </svg>
-          Create New User
-        </button>
-        <a href="<%= dashboard_path %>" class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-semibold rounded-lg hover:bg-gray-700">
-          ← Back to Dashboard
-        </a>
+    <div class="mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">👥 User Management</h1>
+          <p class="mt-2 text-sm text-gray-600">Manage user accounts, passwords, and access</p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2 sm:gap-4">
+          <button onclick="openModal('createUserModal')" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Create New User
+          </button>
+          <a href="<%= dashboard_path %>" class="inline-flex items-center justify-center px-4 py-2 bg-gray-600 text-white text-sm font-semibold rounded-lg hover:bg-gray-700">
+            ← Back to Dashboard
+          </a>
+        </div>
       </div>
     </div>
 
@@ -31,123 +33,268 @@
       </div>
     <% end %>
 
-    <!-- Users Table -->
-    <div class="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name (Private)</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <% @users.each do |user| %>
-            <tr class="<%= user.enabled? ? '' : 'bg-gray-50' %>">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center">
-                  <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span class="text-blue-600 font-semibold text-lg"><%= user.username[0].upcase %></span>
-                  </div>
-                  <div class="ml-4">
-                    <div class="text-sm font-medium text-gray-900"><%= user.username %></div>
-                  </div>
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900"><%= user.name.present? ? user.name : '-' %></div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <% if user.enabled? %>
-                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                    ✓ Active
-                  </span>
-                <% else %>
-                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                    ✗ Disabled
-                  </span>
+    <!-- Mobile Card View (visible on small screens) -->
+    <div class="block md:hidden space-y-4">
+      <% @users.each do |user| %>
+        <% is_current_user = (user.id == @current_user.id) %>
+        <div class="bg-white shadow-lg rounded-lg border <%= is_current_user ? 'border-blue-500 border-2' : 'border-gray-200' %> p-4 <%= user.enabled? ? '' : 'bg-gray-50' %>">
+          <!-- User Header -->
+          <div class="flex items-center mb-4">
+            <div class="flex-shrink-0 h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <span class="text-blue-600 font-semibold text-xl"><%= user.username[0].upcase %></span>
+            </div>
+            <div class="ml-4 flex-1">
+              <div class="text-lg font-semibold text-gray-900">
+                <%= user.username %>
+                <% if is_current_user %>
+                  <span class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">You</span>
                 <% end %>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= user.admin? ? '👑 Admin' : '👤 User' %>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= time_ago_in_words(user.created_at) %> ago
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <div class="flex items-center justify-end gap-2">
-                  <!-- Edit Name -->
-                  <button onclick="openEditModal(<%= user.id %>, '<%= user.username %>', '<%= user.name %>')" 
-                          class="text-blue-600 hover:text-blue-900" title="Edit Name">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                    </svg>
-                  </button>
+              </div>
+              <div class="text-sm text-gray-500"><%= user.name.present? ? user.name : 'No name set' %></div>
+            </div>
+          </div>
 
-                  <!-- Change Password -->
-                  <button onclick="openPasswordModal(<%= user.id %>, '<%= user.username %>')" 
-                          class="text-yellow-600 hover:text-yellow-900" title="Change Password">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
-                    </svg>
-                  </button>
+          <!-- User Details -->
+          <div class="space-y-2 mb-4 text-sm">
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Status:</span>
+              <% if user.enabled? %>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                  ✓ Active
+                </span>
+              <% else %>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                  ✗ Disabled
+                </span>
+              <% end %>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Type:</span>
+              <span class="font-medium"><%= user.admin? ? '👑 Admin' : '👤 User' %></span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Created:</span>
+              <span><%= time_ago_in_words(user.created_at) %> ago</span>
+            </div>
+          </div>
 
-                  <!-- Reset Credentials -->
-                  <button onclick="openResetModal(<%= user.id %>, '<%= user.username %>')" 
-                          class="text-purple-600 hover:text-purple-900" title="Reset Username/Password">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                  </button>
+          <!-- Actions -->
+          <div class="pt-4 border-t border-gray-200">
+            <div class="grid grid-cols-3 gap-2">
+              <!-- Edit Name -->
+              <button onclick="openEditModal(<%= user.id %>, '<%= user.username %>', '<%= user.name %>')" 
+                      class="flex flex-col items-center p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                <span class="text-xs mt-1">Edit</span>
+              </button>
 
-                  <!-- Toggle Status -->
-                  <%= button_to toggle_status_admin_user_path(user), method: :patch, 
-                      class: "#{user.enabled? ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'}", 
-                      title: "#{user.enabled? ? 'Disable' : 'Enable'} User",
-                      form: { data: { turbo_confirm: "Are you sure you want to #{user.enabled? ? 'disable' : 'enable'} #{user.username}?" } } do %>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <% if user.enabled? %>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
-                      <% else %>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                      <% end %>
-                    </svg>
-                  <% end %>
+              <!-- Change Password -->
+              <button onclick="openPasswordModal(<%= user.id %>, '<%= user.username %>')" 
+                      class="flex flex-col items-center p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                </svg>
+                <span class="text-xs mt-1">Password</span>
+              </button>
 
-                  <!-- Delete -->
-                  <% unless user.admin? %>
-                    <%= button_to admin_user_path(user), method: :delete,
-                        class: "text-red-600 hover:text-red-900",
-                        title: "Delete User",
-                        form: { data: { turbo_confirm: "Are you sure you want to delete #{user.username}? This action cannot be undone." } } do %>
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                      </svg>
-                    <% end %>
-                  <% end %>
+              <!-- Reset -->
+              <button onclick="openResetModal(<%= user.id %>, '<%= user.username %>')" 
+                      class="flex flex-col items-center p-2 text-purple-600 hover:bg-purple-50 rounded-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                <span class="text-xs mt-1">Reset</span>
+              </button>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-2 mt-2">
+              <!-- Toggle Status -->
+              <% if is_current_user %>
+                <div class="flex items-center justify-center p-2 text-gray-400 rounded-lg border border-gray-300 bg-gray-50">
+                  <span class="text-sm">Can't Disable Self</span>
                 </div>
-              </td>
-            </tr>
-          <% end %>
-          <% if @users.empty? %>
+              <% else %>
+                <%= button_to toggle_status_admin_user_path(user), method: :patch, 
+                    class: "flex items-center justify-center gap-2 p-2 #{user.enabled? ? 'text-red-600 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'} rounded-lg border #{user.enabled? ? 'border-red-300' : 'border-green-300'}",
+                    form: { data: { turbo_confirm: "Are you sure you want to #{user.enabled? ? 'disable' : 'enable'} #{user.username}?" } } do %>
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <% if user.enabled? %>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                    <% else %>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <% end %>
+                  </svg>
+                  <span class="text-sm font-medium"><%= user.enabled? ? 'Disable' : 'Enable' %></span>
+                <% end %>
+              <% end %>
+
+              <!-- Delete -->
+              <% if is_current_user || user.admin? %>
+                <div class="flex items-center justify-center p-2 text-gray-400 rounded-lg border border-gray-300 bg-gray-50">
+                  <span class="text-sm">Protected</span>
+                </div>
+              <% else %>
+                <%= button_to admin_user_path(user), method: :delete,
+                    class: "flex items-center justify-center gap-2 p-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-300",
+                    form: { data: { turbo_confirm: "Are you sure you want to delete #{user.username}? This action cannot be undone." } } do %>
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                  </svg>
+                  <span class="text-sm font-medium">Delete</span>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+      <% if @users.empty? %>
+        <div class="bg-white shadow-lg rounded-lg border border-gray-200 p-12 text-center text-gray-500">
+          No users found. Create your first user to get started.
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Desktop Table View (hidden on small screens) -->
+    <div class="hidden md:block bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
             <tr>
-              <td colspan="6" class="px-6 py-12 text-center text-gray-500">
-                No users found. Create your first user to get started.
-              </td>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name (Private)</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% @users.each do |user| %>
+              <% is_current_user = (user.id == @current_user.id) %>
+              <tr class="<%= user.enabled? ? '' : 'bg-gray-50' %> <%= is_current_user ? 'bg-blue-50' : '' %>">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span class="text-blue-600 font-semibold text-lg"><%= user.username[0].upcase %></span>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900">
+                        <%= user.username %>
+                        <% if is_current_user %>
+                          <span class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-600 text-white">You</span>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900"><%= user.name.present? ? user.name : '-' %></div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <% if user.enabled? %>
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                      ✓ Active
+                    </span>
+                  <% else %>
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                      ✗ Disabled
+                    </span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <%= user.admin? ? '👑 Admin' : '👤 User' %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <%= time_ago_in_words(user.created_at) %> ago
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div class="flex items-center justify-end gap-2">
+                    <!-- Edit Name -->
+                    <button onclick="openEditModal(<%= user.id %>, '<%= user.username %>', '<%= user.name %>')" 
+                            class="text-blue-600 hover:text-blue-900" title="Edit Name">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                      </svg>
+                    </button>
+
+                    <!-- Change Password -->
+                    <button onclick="openPasswordModal(<%= user.id %>, '<%= user.username %>')" 
+                            class="text-yellow-600 hover:text-yellow-900" title="Change Password">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                      </svg>
+                    </button>
+
+                    <!-- Reset Credentials -->
+                    <button onclick="openResetModal(<%= user.id %>, '<%= user.username %>')" 
+                            class="text-purple-600 hover:text-purple-900" title="Reset Username/Password">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                      </svg>
+                    </button>
+
+                    <!-- Toggle Status -->
+                    <% if is_current_user %>
+                      <span class="text-gray-400 cursor-not-allowed" title="Cannot disable yourself">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                        </svg>
+                      </span>
+                    <% else %>
+                      <%= button_to toggle_status_admin_user_path(user), method: :patch, 
+                          class: "#{user.enabled? ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'}", 
+                          title: "#{user.enabled? ? 'Disable' : 'Enable'} User",
+                          form: { data: { turbo_confirm: "Are you sure you want to #{user.enabled? ? 'disable' : 'enable'} #{user.username}?" } } do %>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <% if user.enabled? %>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 715.636 5.636m12.728 12.728L5.636 5.636"></path>
+                          <% else %>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          <% end %>
+                        </svg>
+                      <% end %>
+                    <% end %>
+
+                    <!-- Delete -->
+                    <% if is_current_user || user.admin? %>
+                      <span class="text-gray-400 cursor-not-allowed" title="Protected user">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                      </span>
+                    <% else %>
+                      <%= button_to admin_user_path(user), method: :delete,
+                          class: "text-red-600 hover:text-red-900",
+                          title: "Delete User",
+                          form: { data: { turbo_confirm: "Are you sure you want to delete #{user.username}? This action cannot be undone." } } do %>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+            <% if @users.empty? %>
+              <tr>
+                <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                  No users found. Create your first user to get started.
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- Create User Modal -->
 <div id="createUserModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-  <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+  <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-md shadow-lg rounded-md bg-white">
     <div class="mb-4">
       <h3 class="text-lg font-bold text-gray-900">Create New User</h3>
       <p class="text-sm text-gray-600 mt-1">Add a new user to the system</p>
@@ -192,7 +339,7 @@
 
 <!-- Edit Name Modal -->
 <div id="editNameModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-  <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+  <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-md shadow-lg rounded-md bg-white">
     <div class="mb-4">
       <h3 class="text-lg font-bold text-gray-900">Edit User</h3>
       <p class="text-sm text-gray-600 mt-1">Update user's private name identifier</p>
@@ -225,7 +372,7 @@
 
 <!-- Change Password Modal -->
 <div id="passwordModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-  <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+  <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-md shadow-lg rounded-md bg-white">
     <div class="mb-4">
       <h3 class="text-lg font-bold text-gray-900">Change Password</h3>
       <p class="text-sm text-gray-600 mt-1">Set a new password for this user</p>
@@ -264,7 +411,7 @@
 
 <!-- Reset Credentials Modal -->
 <div id="resetModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-  <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+  <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-md shadow-lg rounded-md bg-white">
     <div class="mb-4">
       <h3 class="text-lg font-bold text-gray-900">⚠️ Reset Credentials</h3>
       <p class="text-sm text-gray-600 mt-1">Reset username and/or password without requiring previous credentials</p>

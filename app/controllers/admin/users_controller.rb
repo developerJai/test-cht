@@ -1,10 +1,11 @@
 class Admin::UsersController < ApplicationController
   before_action :authorized
+  before_action :set_current_user
   before_action :require_admin
   before_action :set_user, only: [:edit, :update, :toggle_status, :reset_credentials]
 
   def index
-    @users = User.where.not(id: @current_user.id).order(created_at: :desc)
+    @users = User.all.order(created_at: :desc)
     @new_user = User.new
   end
 
@@ -49,6 +50,12 @@ class Admin::UsersController < ApplicationController
   end
 
   def toggle_status
+    if @edit_user.id == @current_user.id
+      flash[:error] = "You cannot disable your own account"
+      redirect_to admin_users_path
+      return
+    end
+    
     if @edit_user.toggle_status!
       status = @edit_user.enabled? ? "enabled" : "disabled"
       flash[:success] = "User '#{@edit_user.username}' has been #{status}"
@@ -85,7 +92,10 @@ class Admin::UsersController < ApplicationController
 
   def destroy
     @edit_user = User.find(params[:id])
-    if @edit_user.admin?
+    
+    if @edit_user.id == @current_user.id
+      flash[:error] = "You cannot delete your own account"
+    elsif @edit_user.admin?
       flash[:error] = "Cannot delete admin users"
     elsif @edit_user.destroy
       flash[:success] = "User deleted successfully"
@@ -96,6 +106,10 @@ class Admin::UsersController < ApplicationController
   end
 
   private
+
+  def set_current_user
+    @current_user = current_user
+  end
 
   def require_admin
     unless @current_user.admin?
