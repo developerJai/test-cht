@@ -4,13 +4,14 @@ class WelcomeController < ApplicationController
   end
 
   def create
-    user = User.find_by_username(params[:username])
-    if user && user.authenticate(params[:password])
+    user = User.find_by_username(params[:username].to_s.downcase.strip)
+    if user && user.authenticate(params[:password].to_s.downcase.strip)
       if user.enabled?
         session[:current_user_id] = user.id
+        flash[:success] = "Welcome back! login successful"
         redirect_to dashboard_path
       else
-        flash[:error] = "Your account has been disabled. Please contact the administrator."
+        flash[:error] = "Something wrong happened, contact support!"
         redirect_to root_path
       end
     else  
@@ -22,7 +23,7 @@ class WelcomeController < ApplicationController
   def logout
     session[:current_user_id] = nil
     session[:selected_user_id] = nil
-    flash[:notice] = "You have been logged out successfully"
+    flash[:notice] = "Bye Bye.. See You Soon!"
     redirect_to root_path
   end
 end

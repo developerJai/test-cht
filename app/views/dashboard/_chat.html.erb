@@ -85,7 +85,8 @@
                               </span>
                               <%= render partial: 'image', locals: { msg: msg } %>
                             <% else %>
-                              <span id="msg-content-<%= msg.id %>"> <%= linkify(msg.content.force_encoding('UTF-8')) %> </span>
+                              <% content_text = msg.content.force_encoding('UTF-8') %>
+                              <span id="msg-content-<%= msg.id %>"> <%= emojify(linkify(content_text)) %> </span>
                             <% end %>
 
                             <small id="msg-time-<%=msg.id%>" class="hidden">

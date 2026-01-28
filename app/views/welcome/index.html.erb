@@ -1,50 +1,68 @@
+<% if flash[:notice] || flash[:error] || flash[:success] %>
+  <div id="flash-message" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-11/12 max-w-md">
+    <div class="<%= flash[:error] ? 'bg-red-500' : 'bg-green-500' %> text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-between">
+      <span class="text-sm font-medium"><%= flash[:notice] || flash[:error] || flash[:success] %></span>
+      <button onclick="document.getElementById('flash-message').remove()" class="ml-4 text-white hover:text-gray-200">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+  <script>
+    setTimeout(function() {
+      var el = document.getElementById('flash-message');
+      if (el) el.remove();
+    }, 3000);
+  </script>
+<% end %>
 
 <div class="bg-white">
-  <div class="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
+  <div class="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-16 lg:max-w-7xl lg:px-8">
     <h2 class="sr-only">Products</h2>
 
-    <div class="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
+    <div class="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
       <a href="#" class="group">
-        <div class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-white border border-gray-300 xl:aspect-h-8 xl:aspect-w-7 flex items-center justify-center hover:border-gray-400">
-          <span class="text-2xl font-semibold text-gray-700">Pain Relief</span>
+        <div class="p-4 sm:p-6 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 hover:border-blue-300 hover:shadow-md transition-all">
+          <div class="text-2xl sm:text-3xl mb-2">💊</div>
+          <span class="text-sm sm:text-base font-semibold text-gray-800 block">Pain Relief</span>
+          <span class="text-xs text-gray-500 hidden sm:block mt-1">Analgesics</span>
         </div>
-        <h3 class="mt-4 text-sm text-gray-700">Analgesics & Anti-inflammatory</h3>
-        <p class="mt-1 text-lg font-medium text-gray-900">Category</p>
       </a>
       <a href="#" class="group">
-        <div class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-white border border-gray-300 xl:aspect-h-8 xl:aspect-w-7 flex items-center justify-center hover:border-gray-400">
-          <span class="text-2xl font-semibold text-gray-700">Vaccines</span>
+        <div class="p-4 sm:p-6 rounded-xl bg-gradient-to-br from-green-50 to-green-100 border border-green-200 hover:border-green-300 hover:shadow-md transition-all">
+          <div class="text-2xl sm:text-3xl mb-2">💉</div>
+          <span class="text-sm sm:text-base font-semibold text-gray-800 block">Vaccines</span>
+          <span class="text-xs text-gray-500 hidden sm:block mt-1">Immunization</span>
         </div>
-        <h3 class="mt-4 text-sm text-gray-700">Immunization & Prevention</h3>
-        <p class="mt-1 text-lg font-medium text-gray-900">Category</p>
       </a>
       <a href="#" class="group">
-        <div class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-white border border-gray-300 xl:aspect-h-8 xl:aspect-w-7 flex items-center justify-center hover:border-gray-400">
-          <span class="text-2xl font-semibold text-gray-700">Antibiotics</span>
+        <div class="p-4 sm:p-6 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 hover:border-amber-300 hover:shadow-md transition-all">
+          <div class="text-2xl sm:text-3xl mb-2">🧬</div>
+          <span class="text-sm sm:text-base font-semibold text-gray-800 block">Antibiotics</span>
+          <span class="text-xs text-gray-500 hidden sm:block mt-1">Antimicrobial</span>
         </div>
-        <h3 class="mt-4 text-sm text-gray-700">Antimicrobial Agents</h3>
-        <p class="mt-1 text-lg font-medium text-gray-900">Category</p>
       </a>
       <a href="#" class="group">
-        <div class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-white border border-gray-300 xl:aspect-h-8 xl:aspect-w-7 flex items-center justify-center hover:border-gray-400">
-          <span class="text-2xl font-semibold text-gray-700">Cardiovascular</span>
+        <div class="p-4 sm:p-6 rounded-xl bg-gradient-to-br from-red-50 to-red-100 border border-red-200 hover:border-red-300 hover:shadow-md transition-all">
+          <div class="text-2xl sm:text-3xl mb-2">❤️</div>
+          <span class="text-sm sm:text-base font-semibold text-gray-800 block">Cardiovascular</span>
+          <span class="text-xs text-gray-500 hidden sm:block mt-1">Heart & BP</span>
         </div>
-        <h3 class="mt-4 text-sm text-gray-700">Heart & Blood Pressure</h3>
-        <p class="mt-1 text-lg font-medium text-gray-900">Category</p>
       </a>
     </div>
 
-    <div class="text-center">
+    <div class="text-center mt-10">
         <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">Search Medicine Database</h1>
         <p class="mt-6 text-lg leading-8 text-gray-600">Access comprehensive information on medications, dosages, interactions, and safety guidelines. Enter your credentials to continue.</p>
         <div class="mt-10 flex items-center justify-center gap-x-6">
-          <%=form_for :login, url: auth_path do |f|%>
+          <%=form_for :login, url: auth_path, html: { autocomplete: "off", data: { lpignore: "true" } } do |f|%>
 
             <div class="flex">
-              <input type="text" autocomplete="off" id="uname" name="username" placeholder="UID" class="flex-shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-e-0 border-gray-300 dark:border-gray-700 dark:text-white rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
+              <input type="text" autocomplete="off" id="uname" name="username" placeholder="UID" data-lpignore="true" class="flex-shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-e-0 border-gray-300 dark:border-gray-700 dark:text-white rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
 
               <div class="relative w-full">
-                <input id="pass" type="password" name="password" placeholder="KEY" class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-e-lg rounded-s-gray-100 rounded-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500">
+                <input id="pass" type="password" name="password" placeholder="KEY" autocomplete="off" data-lpignore="true" class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-e-lg rounded-s-gray-100 rounded-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500">
 
                 <input type="submit" value="Price" class="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-white bg-blue-700 rounded-e-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
               </div>

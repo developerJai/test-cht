@@ -75,7 +75,7 @@ class DashboardController < ApplicationController
     # Determine recipient explicitly
     recipient = get_conversation_partner
 
-    prev_msg = @current_user.messages.recent_messages.first
+    prev_msg = Message.where(user_id: @current_user.id, recipient_id: recipient&.id).recent_messages.first
 
     # Create message with explicit sender and recipient
     msg = @current_user.messages.create(

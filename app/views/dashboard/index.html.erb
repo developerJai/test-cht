@@ -1,3 +1,22 @@
+<% if flash[:notice] || flash[:error] || flash[:success] %>
+  <div id="flash-message" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-11/12 max-w-md">
+    <div class="<%= flash[:error] ? 'bg-red-500' : 'bg-green-500' %> text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-between">
+      <span class="text-sm font-medium"><%= flash[:notice] || flash[:error] || flash[:success] %></span>
+      <button onclick="document.getElementById('flash-message').remove()" class="ml-4 text-white hover:text-gray-200">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+  <script>
+    setTimeout(function() {
+      var el = document.getElementById('flash-message');
+      if (el) el.remove();
+    }, 3000);
+  </script>
+<% end %>
+
 <div data-controller="chats">
 <div class="bg-white">
   <div class="mx-auto max-w-7xl py-16 sm:px-6 sm:py-32 lg:px-8">
@@ -27,7 +46,7 @@
         </div>
         <% end %>
         
-        <div class="mt-10 flex items-center justify-center gap-x-6 lg:justify-start flex-wrap">
+        <div class="mt-10 mb-10 flex items-center justify-center gap-x-6 lg:justify-start flex-wrap">
           <% if @current_user.admin? %>
             <a href="<%=admin_users_path%>" class="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-black border border-gray-300 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
               👥 Users
@@ -37,12 +56,6 @@
           <% if @person.present? || !@current_user.admin? %>
             <div class="text-sm font-semibold leading-6 text-gray-900 cursor-pointer" data-action="click->chats#openModal" id="good-link">Support</div>
           <% end %>
-        </div>
-      </div>
-      <div class="relative mt-16 h-80 lg:mt-8 flex items-center justify-center">
-        <div class="text-center">
-          <div class="text-6xl font-bold text-gray-300">Rx</div>
-          <p class="mt-4 text-sm text-gray-500">Medical Database</p>
         </div>
       </div>
     </div>
