@@ -1,0 +1,15 @@
+[Unit]
+Description=Puma - codes-pro
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/codes-pro
+ExecStart=/root/.rbenv/shims/bundle exec puma -C config/puma.rb
+Restart=always
+RestartSec=3
+Environment=RAILS_ENV=production
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,15 @@
+[Unit]
+Description=Puma - backoffice-storefront-staging
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/backoffice-storefront-staging
+ExecStart=/root/.rbenv/shims/bundle exec puma -C config/puma.rb
+Restart=always
+RestartSec=3
+Environment=RAILS_ENV=staging
+
+[Install]
+WantedBy=multi-user.target

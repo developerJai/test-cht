@@ -1,0 +1,14 @@
+[Unit]
+Description=Puma HTTP Server for test-cht
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/test-cht
+ExecStart=/root/.rbenv/shims/bundle exec puma -C /var/www/test-cht/config/puma.rb
+ExecStop=/root/.rbenv/shims/bundle exec pumactl -S /var/www/test-cht/tmp/pids/puma.state stop
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
