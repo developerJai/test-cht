@@ -1,0 +1,291 @@
+<div class="bg-white min-h-screen">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">🕒 Message Timestamps</h1>
+          <p class="mt-2 text-sm text-gray-600">
+            Move selected messages in time. Gaps between them are always preserved.
+          </p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2 sm:gap-4">
+          <a href="<%= admin_users_path %>" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700">
+            👥 Users
+          </a>
+          <a href="<%= dashboard_path %>" class="inline-flex items-center justify-center px-4 py-2 bg-gray-600 text-white text-sm font-semibold rounded-lg hover:bg-gray-700">
+            ← Back to Dashboard
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flash -->
+    <% if flash[:success] %>
+      <div class="mb-4 rounded-lg bg-green-50 p-4 text-sm text-green-800 border border-green-200"><%= flash[:success] %></div>
+    <% end %>
+    <% if flash[:error] %>
+      <div class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-800 border border-red-200"><%= flash[:error] %></div>
+    <% end %>
+
+    <!-- Clock reference -->
+    <div class="mb-6 rounded-lg bg-gray-50 border border-gray-200 p-4 text-sm text-gray-700">
+      <span class="font-semibold">Server clock:</span>
+      <%= Time.current.utc.strftime("%d %b %Y %H:%M:%S") %> UTC
+      <span class="text-gray-400">·</span>
+      <%= Time.current.in_time_zone("Asia/Kolkata").strftime("%d %b %Y %H:%M:%S") %> IST
+      <p class="mt-1 text-xs text-gray-500">
+        Every time on this page is shown in both. The database stores UTC, so the target field below is UTC.
+      </p>
+    </div>
+
+    <!-- Conversation filter -->
+    <%= form_with url: admin_message_timestamps_path, method: :get, class: "mb-6" do %>
+      <div class="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-end gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Between</label>
+            <select name="pair_a" class="rounded-lg border-gray-300 border p-2 text-sm">
+              <option value="">— any user —</option>
+              <% @users.each do |u| %>
+                <option value="<%= u.id %>" <%= "selected" if @pair_a.to_s == u.id.to_s %>>
+                  <%= u.username %> (id <%= u.id %>)
+                </option>
+              <% end %>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">and</label>
+            <select name="pair_b" class="rounded-lg border-gray-300 border p-2 text-sm">
+              <option value="">— any user —</option>
+              <% @users.each do |u| %>
+                <option value="<%= u.id %>" <%= "selected" if @pair_b.to_s == u.id.to_s %>>
+                  <%= u.username %> (id <%= u.id %>)
+                </option>
+              <% end %>
+            </select>
+          </div>
+          <button type="submit" class="px-4 py-2 bg-gray-900 text-white text-sm font-semibold rounded-lg hover:bg-gray-700">
+            Show conversation
+          </button>
+          <a href="<%= admin_message_timestamps_path %>" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-900">Reset</a>
+        </div>
+        <p class="mt-3 text-xs text-gray-500">
+          Showing <span class="font-semibold"><%= @messages.size %></span> of
+          <span class="font-semibold"><%= @total_in_scope %></span> message(s) in this selection —
+          the full conversation, not just recent ones.
+        </p>
+      </div>
+    <% end %>
+
+    <% if @truncated %>
+      <div class="mb-6 rounded-lg bg-amber-50 border border-amber-300 p-4 text-sm text-amber-900">
+        ⚠️ This conversation holds <strong><%= @total_in_scope %></strong> messages and only the most recent
+        <strong><%= Admin::MessageTimestampsController::MAX_ROWS %></strong> are listed.
+        Narrow it down with the filter above so nothing stays hidden.
+      </div>
+    <% end %>
+
+    <!-- Preview result -->
+    <% if @plan && @plan[:error].blank? %>
+      <div class="mb-6 rounded-lg border-2 border-blue-400 bg-blue-50 p-4">
+        <h2 class="text-lg font-bold text-blue-900 mb-1">Preview — nothing has been changed yet</h2>
+        <% delta = @plan[:delta_seconds] %>
+        <p class="text-sm text-blue-800 mb-4">
+          <%= pluralize(@plan[:rows].size, "message") %> will move
+          <span class="font-semibold">
+            <%= delta.negative? ? "backward" : "forward" %>
+            <%= distance_of_time_in_words(0, delta.abs) %>
+          </span>
+          (<%= delta.round(3) %> seconds). Check the rows below, then apply.
+        </p>
+
+        <div class="overflow-x-auto bg-white rounded-lg border border-blue-200">
+          <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <thead class="bg-blue-100">
+              <tr>
+                <th class="px-3 py-2 text-left font-semibold text-gray-700">ID</th>
+                <th class="px-3 py-2 text-left font-semibold text-gray-700">From → To</th>
+                <th class="px-3 py-2 text-left font-semibold text-gray-700">Before (UTC)</th>
+                <th class="px-3 py-2 text-left font-semibold text-gray-700">After (UTC)</th>
+                <th class="px-3 py-2 text-left font-semibold text-gray-700">After (IST)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <% @plan[:rows].each do |row| %>
+                <tr>
+                  <td class="px-3 py-2 font-mono"><%= row[:id] %></td>
+                  <td class="px-3 py-2">
+                    <%= @usernames[row[:user_id]] || row[:user_id] %> →
+                    <%= @usernames[row[:recipient_id]] || row[:recipient_id] || "—" %>
+                  </td>
+                  <td class="px-3 py-2 font-mono text-gray-500"><%= row[:before].utc.strftime("%d %b %Y %H:%M:%S") %></td>
+                  <td class="px-3 py-2 font-mono font-semibold text-blue-900"><%= row[:after].utc.strftime("%d %b %Y %H:%M:%S") %></td>
+                  <td class="px-3 py-2 font-mono text-gray-600"><%= row[:after].in_time_zone("Asia/Kolkata").strftime("%d %b %Y %H:%M:%S") %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+        <%= form_with url: apply_admin_message_timestamps_path, method: :post, class: "mt-4", data: { turbo: false } do %>
+          <% @plan[:rows].each do |row| %>
+            <input type="hidden" name="message_ids[]" value="<%= row[:id] %>">
+          <% end %>
+          <input type="hidden" name="expected_count" value="<%= @plan[:rows].size %>">
+          <input type="hidden" name="mode" value="<%= @plan[:mode] %>">
+          <input type="hidden" name="anchor_at" value="<%= params[:anchor_at] %>">
+          <input type="hidden" name="offset_value" value="<%= params[:offset_value] %>">
+          <input type="hidden" name="offset_unit" value="<%= params[:offset_unit] %>">
+          <input type="hidden" name="offset_direction" value="<%= params[:offset_direction] %>">
+          <input type="hidden" name="pair_a" value="<%= @pair_a %>">
+          <input type="hidden" name="pair_b" value="<%= @pair_b %>">
+
+          <button type="submit"
+                  onclick="return confirm('Apply this shift to <%= @plan[:rows].size %> message(s)?')"
+                  class="px-5 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700">
+            ✓ Apply shift to <%= pluralize(@plan[:rows].size, "message") %>
+          </button>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- Picker + shift controls -->
+    <%= form_with url: preview_admin_message_timestamps_path, method: :post, data: { turbo: false } do %>
+      <input type="hidden" name="pair_a" value="<%= @pair_a %>">
+      <input type="hidden" name="pair_b" value="<%= @pair_b %>">
+
+      <div class="rounded-lg border border-gray-200 bg-white shadow-sm p-4 mb-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-4">How should they move?</h2>
+
+        <!-- Anchor mode -->
+        <label class="flex items-start gap-3 mb-3 cursor-pointer">
+          <input type="radio" name="mode" value="anchor" class="mt-1" <%= "checked" if params[:mode] != "offset" %>>
+          <span class="flex-1">
+            <span class="font-semibold text-gray-900">Land the newest selected message on a specific time</span>
+            <span class="block text-xs text-gray-500 mb-2">
+              The whole selection moves together by the same amount, so the spacing between messages stays identical.
+            </span>
+            <span class="flex flex-wrap items-center gap-2">
+              <input type="datetime-local" step="1" id="anchor_at" name="anchor_at"
+                     value="<%= params[:anchor_at].presence || Time.current.utc.strftime('%Y-%m-%dT%H:%M:%S') %>"
+                     class="rounded-lg border border-gray-300 p-2 text-sm">
+              <span class="text-xs font-semibold text-gray-500">UTC</span>
+              <button type="button" onclick="setAnchor(0)" class="px-2 py-1 text-xs bg-gray-100 rounded hover:bg-gray-200">now</button>
+              <button type="button" onclick="setAnchor(1)" class="px-2 py-1 text-xs bg-gray-100 rounded hover:bg-gray-200">1h ago</button>
+              <button type="button" onclick="setAnchor(5)" class="px-2 py-1 text-xs bg-blue-100 text-blue-800 font-semibold rounded hover:bg-blue-200">5h ago</button>
+              <button type="button" onclick="setAnchor(24)" class="px-2 py-1 text-xs bg-gray-100 rounded hover:bg-gray-200">24h ago</button>
+            </span>
+          </span>
+        </label>
+
+        <!-- Offset mode -->
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="radio" name="mode" value="offset" class="mt-1" <%= "checked" if params[:mode] == "offset" %>>
+          <span class="flex-1">
+            <span class="font-semibold text-gray-900">Shift everything selected by a fixed amount</span>
+            <span class="block text-xs text-gray-500 mb-2">Useful for nudging a batch without pinning it to a clock time.</span>
+            <span class="flex flex-wrap items-center gap-2">
+              <select name="offset_direction" class="rounded-lg border border-gray-300 p-2 text-sm">
+                <option value="back" <%= "selected" if params[:offset_direction] == "back" %>>Back</option>
+                <option value="forward" <%= "selected" if params[:offset_direction] == "forward" %>>Forward</option>
+              </select>
+              <input type="number" name="offset_value" step="any" min="0" placeholder="5"
+                     value="<%= params[:offset_value] %>"
+                     class="w-24 rounded-lg border border-gray-300 p-2 text-sm">
+              <select name="offset_unit" class="rounded-lg border border-gray-300 p-2 text-sm">
+                <option value="minutes" <%= "selected" if params[:offset_unit] == "minutes" %>>minutes</option>
+                <option value="hours" <%= "selected" if params[:offset_unit] != "minutes" && params[:offset_unit] != "days" %>>hours</option>
+                <option value="days" <%= "selected" if params[:offset_unit] == "days" %>>days</option>
+              </select>
+            </span>
+          </span>
+        </label>
+      </div>
+
+      <!-- Message picker -->
+      <div class="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+        <div class="flex flex-wrap items-center justify-between gap-3 p-4 border-b border-gray-200 bg-gray-50">
+          <h2 class="text-lg font-bold text-gray-900">Pick the messages</h2>
+          <div class="flex gap-2">
+            <button type="button" onclick="toggleAll(true)" class="px-3 py-1.5 text-xs font-semibold bg-gray-200 rounded hover:bg-gray-300">Select all</button>
+            <button type="button" onclick="toggleAll(false)" class="px-3 py-1.5 text-xs font-semibold bg-gray-200 rounded hover:bg-gray-300">Clear</button>
+          </div>
+        </div>
+
+        <% if @messages.empty? %>
+          <p class="p-6 text-sm text-gray-500">No messages in this selection.</p>
+        <% else %>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-sm">
+              <thead class="bg-gray-100">
+                <tr>
+                  <th class="px-3 py-2 w-10"></th>
+                  <th class="px-3 py-2 text-left font-semibold text-gray-700">ID</th>
+                  <th class="px-3 py-2 text-left font-semibold text-gray-700">From → To</th>
+                  <th class="px-3 py-2 text-left font-semibold text-gray-700">Created (UTC)</th>
+                  <th class="px-3 py-2 text-left font-semibold text-gray-700">Created (IST)</th>
+                  <th class="px-3 py-2 text-left font-semibold text-gray-700">Message</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <% @messages.each do |msg| %>
+                  <% checked = @selected_ids.present? && @selected_ids.include?(msg.id) %>
+                  <tr class="<%= 'bg-blue-50' if checked %>">
+                    <td class="px-3 py-2">
+                      <input type="checkbox" name="message_ids[]" value="<%= msg.id %>"
+                             class="msg-check h-4 w-4" <%= "checked" if checked %>>
+                    </td>
+                    <td class="px-3 py-2 font-mono"><%= msg.id %></td>
+                    <td class="px-3 py-2 whitespace-nowrap">
+                      <%= @usernames[msg.user_id] || msg.user_id %> →
+                      <%= @usernames[msg.recipient_id] || msg.recipient_id || "—" %>
+                    </td>
+                    <td class="px-3 py-2 font-mono whitespace-nowrap"><%= msg.created_at.utc.strftime("%d %b %Y %H:%M:%S") %></td>
+                    <td class="px-3 py-2 font-mono whitespace-nowrap text-gray-500"><%= msg.created_at.in_time_zone("Asia/Kolkata").strftime("%d %b %Y %H:%M:%S") %></td>
+                    <td class="px-3 py-2 text-gray-600 max-w-xs truncate">
+                      <% if msg.image.present? %>
+                        <span class="text-xs italic">[image]</span>
+                      <% else %>
+                        <%= truncate(msg.content.to_s.dup.force_encoding("UTF-8").scrub, length: 50) %>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="p-4 border-t border-gray-200 bg-gray-50">
+            <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700">
+              Preview shift →
+            </button>
+            <span class="ml-3 text-xs text-gray-500">You will see every before → after row before anything is written.</span>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  // Server "now" in epoch ms, so the presets do not depend on the browser clock.
+  const SERVER_NOW_MS = <%= Time.current.to_i %> * 1000;
+
+  function setAnchor(hoursBack) {
+    const d = new Date(SERVER_NOW_MS - hoursBack * 3600 * 1000);
+    const pad = (n) => String(n).padStart(2, '0');
+    const value = d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate()) +
+                  'T' + pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes()) + ':' + pad(d.getUTCSeconds());
+    const field = document.getElementById('anchor_at');
+    field.value = value;
+    // Picking a preset implies anchor mode.
+    const anchorRadio = document.querySelector('input[name="mode"][value="anchor"]');
+    if (anchorRadio) anchorRadio.checked = true;
+  }
+
+  function toggleAll(state) {
+    document.querySelectorAll('.msg-check').forEach((cb) => { cb.checked = state; });
+  }
+</script>

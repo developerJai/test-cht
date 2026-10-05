@@ -22,6 +22,13 @@ Rails.application.routes.draw do
         patch :reset_credentials
       end
     end
+
+    resources :message_timestamps, only: [:index] do
+      collection do
+        post :preview
+        post :apply
+      end
+    end
   end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
