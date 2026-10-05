@@ -46,7 +46,7 @@
         </div>
         <% end %>
         
-        <div class="mt-10 mb-10 flex items-center justify-center gap-x-6 lg:justify-start flex-wrap">
+        <div class="mt-10 mb-10 flex items-center justify-center gap-x-6 gap-y-3 lg:justify-start flex-wrap">
           <% if @current_user.admin? %>
             <a href="<%=admin_users_path%>" class="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-black border border-gray-300 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
               👥 Users
