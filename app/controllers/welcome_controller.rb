@@ -1,4 +1,9 @@
 class WelcomeController < ApplicationController
+  # Public landing page served at "/". Carries no app chrome and no sign-in form.
+  def home
+    render layout: "plain"
+  end
+
   def index
     redirect_to dashboard_path if logged_in?
   end
@@ -12,11 +17,11 @@ class WelcomeController < ApplicationController
         redirect_to dashboard_path
       else
         flash[:error] = "Something wrong happened, contact support!"
-        redirect_to root_path
+        redirect_to signin_path
       end
-    else  
+    else
       flash[:error] = "Invalid username or password"
-      redirect_to root_path
+      redirect_to signin_path
     end
   end
 
@@ -24,6 +29,6 @@ class WelcomeController < ApplicationController
     session[:current_user_id] = nil
     session[:selected_user_id] = nil
     flash[:notice] = "Bye Bye.. See You Soon!"
-    redirect_to root_path
+    redirect_to signin_path
   end
 end

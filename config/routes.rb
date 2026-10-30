@@ -1,5 +1,8 @@
 Rails.application.routes.draw do
-  root to: 'welcome#index'
+  # Public home page. The app itself is reachable only via the sign-in path below.
+  root to: 'welcome#home'
+
+  get 'signin' => "welcome#index", as: "signin"
   post "auth" => "welcome#create", as: "auth"
   get 'dash' => "dashboard#index", as: "dashboard"
   get "dashout" => "welcome#logout", as: "logout"
