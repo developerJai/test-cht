@@ -28,6 +28,8 @@ Rails.application.routes.draw do
 
     resources :tools, only: [:index]
     resources :images, only: [:index]
+    get    "cloudinary", to: "cloudinary#index",   as: :cloudinary
+    delete "cloudinary", to: "cloudinary#destroy"
 
     resources :message_timestamps, only: [:index] do
       collection do
