@@ -6,6 +6,34 @@
     <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
       <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-3xl lg:max-w-5xl">
         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+          <% if @current_user.admin? && @all_users.present? %>
+            <div class="-mx-4 px-4 sm:-mx-6 sm:px-6 mb-3 pb-3 border-b border-gray-200 overflow-x-auto">
+              <div class="flex gap-2 w-max">
+                <% @all_users.each do |user| %>
+                  <% unseen_count = @unseen_counts&.fetch(user.id, 0) || 0 %>
+                  <% active = @person&.id == user.id %>
+                  <%= link_to switch_user_path(selected_user_id: user.id),
+                        data: { user_id: user.id },
+                        class: "flex items-center gap-2 rounded-full pl-1.5 pr-3 py-1.5 min-h-[44px] whitespace-nowrap #{active ? 'bg-gray-900 text-white' : 'bg-white text-gray-900 border border-gray-200 hover:bg-gray-50'}" do %>
+                    <span class="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold <%= active ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700' %>">
+                      <%= user.username[0].upcase %>
+                    </span>
+                    <span class="text-sm font-semibold"><%= user.username %></span>
+                    <% if unseen_count > 0 %>
+                      <span class="unseen-badge ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-red-500 rounded-full" data-count="<%= unseen_count %>">
+                        <%= unseen_count %>
+                      </span>
+                    <% end %>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+            <% unless @person.present? %>
+              <p class="mb-3 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-900">
+                Pick someone above to open their conversation.
+              </p>
+            <% end %>
+          <% end %>
           <%= form_for :file, url: upload_img_path, html: { multipart: true } do |f| %>
             <div class="mt-1 flex max-w-md gap-x-4" data-controller="textbox">
               <label for="file-input">
