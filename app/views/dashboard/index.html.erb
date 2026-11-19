@@ -96,14 +96,12 @@
         </p>
         
         
-        <% unless @current_user.admin? %>
         <div class="mt-10 mb-10 flex items-center justify-center gap-x-6 gap-y-3 lg:justify-start flex-wrap">
           <a href="<%=logout_path%>" class="rounded-md bg-gray-900 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900">Checkout</a>
           <% if @person.present? || !@current_user.admin? %>
             <div class="text-sm font-semibold leading-6 text-gray-900 cursor-pointer" data-action="click->chats#openModal" id="good-link">Support</div>
           <% end %>
         </div>
-        <% end %>
       </div>
     </div>
   </div>
