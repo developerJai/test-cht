@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
-  # Public home page. The app itself is reachable only via the sign-in path below.
-  root to: 'welcome#home'
+  root to: 'welcome#index'
 
+  # Kept as an alias so links saved while the landing page was live still work.
   get 'signin' => "welcome#index", as: "signin"
   post "auth" => "welcome#create", as: "auth"
   get 'dash' => "dashboard#index", as: "dashboard"
