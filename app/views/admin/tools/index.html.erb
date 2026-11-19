@@ -1,0 +1,99 @@
+<div class="min-h-screen bg-gray-50 py-6 sm:py-10">
+  <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+
+    <div class="mb-6 sm:flex sm:items-center sm:justify-between">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">🧹 Cleanup</h1>
+        <p class="mt-1 text-sm text-gray-600">Unsent drafts and message removal. Admin only.</p>
+      </div>
+      <div class="mt-4 flex flex-wrap gap-2 sm:mt-0">
+        <a href="<%= admin_users_path %>" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700">
+          👥 Users
+        </a>
+        <a href="<%= admin_message_timestamps_path %>" class="inline-flex items-center justify-center px-4 py-2 bg-white text-gray-800 border border-gray-300 text-sm font-semibold rounded-lg hover:bg-gray-50">
+          🕒 Timestamps
+        </a>
+        <a href="<%= dashboard_path %>" class="inline-flex items-center justify-center px-4 py-2 bg-gray-600 text-white text-sm font-semibold rounded-lg hover:bg-gray-700">
+          ← Dashboard
+        </a>
+      </div>
+    </div>
+
+    <% if flash[:notice] || flash[:error] || flash[:success] %>
+      <div class="mb-4 rounded-lg px-4 py-3 text-sm font-medium <%= flash[:error] ? 'bg-red-50 text-red-800 border border-red-200' : 'bg-green-50 text-green-800 border border-green-200' %>">
+        <%= flash[:notice] || flash[:error] || flash[:success] %>
+      </div>
+    <% end %>
+
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+
+      <div class="rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-base font-semibold text-gray-900">Your drafts</h2>
+          <%= link_to "Remove all", text_removed_clear_path(from: "admin"),
+                class: "text-sm font-semibold text-red-600 hover:text-red-700",
+                data: { turbo_confirm: "Remove all of your drafts?" } %>
+        </div>
+        <p class="mt-1 text-xs text-gray-500">Text you typed but never sent.</p>
+        <ol class="mt-3 space-y-1.5 text-sm text-gray-700">
+          <% if @my_removed_texts.present? %>
+            <% @my_removed_texts.each_with_index do |text, ind| %>
+              <li class="rounded-md bg-gray-50 px-2.5 py-1.5 break-words">
+                <span class="text-gray-400"><%= ind + 1 %>.</span>
+                <%= text.content.force_encoding('UTF-8') %>
+                <span class="text-xs text-gray-400">(<%= time_ago_in_words(text.created_at) %>)</span>
+              </li>
+            <% end %>
+          <% else %>
+            <li class="text-gray-400">Nothing here.</li>
+          <% end %>
+        </ol>
+      </div>
+
+      <div class="rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-base font-semibold text-gray-900">
+            Guest drafts<%= @guest ? " — #{@guest.username}" : "" %>
+          </h2>
+          <%= link_to "Remove all", text_removed_clear_path(guest: "yes", from: "admin"),
+                class: "text-sm font-semibold text-red-600 hover:text-red-700",
+                data: { turbo_confirm: "Remove all drafts for #{@guest&.username}?" } %>
+        </div>
+        <p class="mt-1 text-xs text-gray-500">Follows whoever is selected on the dashboard.</p>
+        <ol class="mt-3 space-y-1.5 text-sm text-gray-700">
+          <% if @removed_texts.present? %>
+            <% @removed_texts.each_with_index do |text, ind| %>
+              <li class="rounded-md bg-gray-50 px-2.5 py-1.5 break-words">
+                <span class="text-gray-400"><%= ind + 1 %>.</span>
+                <%= text.content.force_encoding('UTF-8') %>
+                <span class="text-xs text-gray-400">(<%= time_ago_in_words(text.created_at) %>)</span>
+              </li>
+            <% end %>
+          <% else %>
+            <li class="text-gray-400">Nothing here.</li>
+          <% end %>
+        </ol>
+      </div>
+    </div>
+
+    <div class="mt-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
+      <h2 class="text-base font-semibold text-gray-900">Delete your messages by id</h2>
+      <p class="mt-1 text-xs text-gray-500">
+        Deletes your own messages with ids in this range, inclusive. This cannot be undone.
+      </p>
+      <%= form_for :remove_msg, url: remove_msg_path(from: "admin"),
+            html: { data: { turbo_confirm: "Delete your messages in this id range? This cannot be undone." } } do |f| %>
+        <div class="mt-3 flex flex-wrap items-center gap-2">
+          <input type="number" required autocomplete="off" name="from" placeholder="From id"
+                 class="w-32 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:ring-1 focus:ring-gray-500">
+          <span class="text-gray-400">→</span>
+          <input type="number" required autocomplete="off" name="to" placeholder="To id"
+                 class="w-32 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:ring-1 focus:ring-gray-500">
+          <input type="submit" value="Delete"
+                 class="cursor-pointer rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">
+        </div>
+      <% end %>
+    </div>
+
+  </div>
+</div>

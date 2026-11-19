@@ -54,6 +54,9 @@
             <a href="<%=admin_message_timestamps_path%>" class="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-black border border-gray-300 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
               🕒 Timestamps
             </a>
+            <a href="<%=admin_tools_path%>" class="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-black border border-gray-300 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+              🧹 Cleanup
+            </a>
           <% end %>
           <a href="<%=logout_path%>" class="rounded-md bg-gray-900 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900">Checkout</a>
           <% if @person.present? || !@current_user.admin? %>
@@ -78,50 +81,13 @@
         <dt class="text-base leading-7 text-gray-600">Daily Queries</dt>
         <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">100,000+</dd>
       </div>
-      <div class="mx-auto flex max-w-xs flex-col gap-y-4" data-action="click->chats#openRemoved">
+      <div class="mx-auto flex max-w-xs flex-col gap-y-4">
         <dt class="text-base leading-7 text-gray-600">Active Users</dt>
         <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">15,000+</dd>
       </div>
     </dl>
   </div>
 
-  <div id="removed-text" class="mx-auto max-w-7xl px-6 lg:px-8 bg-white text-left text-gray-300 hidden">
-  <% if @current_user.username == "qwert" %>
-    Gone ME <a href="<%=text_removed_clear_path()%>">Remove all</a>: <br>
-      <% if @my_removed_texts.present? %>
-        <% @my_removed_texts.each_with_index do |text,ind| %>
-          <%=ind+1%> : <%=text.content.force_encoding('UTF-8')%> (<%= time_ago_in_words(text.created_at) %>)<br>
-        <%end%>
-      <% else %>
-        N/A
-      <% end %>
-    <br><br>
-
-    Gone Guest <a href="<%=text_removed_clear_path(guest: "yes")%>">Remove all</a>: <br>
-    <% if @removed_texts.present? %>
-      <% @removed_texts.each_with_index do |text,ind| %>
-        <%=ind+1%> : <%=text.content.force_encoding('UTF-8')%> (<%= time_ago_in_words(text.created_at) %>)<br>
-      <%end%>
-    <% else %>
-      N/A
-    <% end %>
-    <br><br>
-    Clear: <br>
-
-    <%=form_for :remove_msg, url: remove_msg_path do |f|%>
-      <div class="flex">
-        <input type="text" required autocomplete="off" name="from" placeholder="From" class="flex-shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-e-0 border-gray-300 dark:border-gray-700 dark:text-white rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
-
-        <div class="relative w-full">
-          <input type="text" required name="to" placeholder="To" class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-e-lg rounded-s-gray-100 rounded-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500">
-
-          <input type="submit" value="Go" class="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-white bg-blue-700 rounded-e-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-        </div>
-      </div>
-    <% end %>
-
-  <% end %>
-</div>
 </div>
 
 </div>

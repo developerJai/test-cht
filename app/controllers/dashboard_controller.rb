@@ -116,14 +116,14 @@ class DashboardController < ApplicationController
     else
       @current_user.removed_texts.destroy_all
     end
-    redirect_to dashboard_path
+    redirect_to return_path
   end
 
   def remove_msg
     if params[:from].present? && params[:to].present?
       @current_user.messages.where("id >= ? and id <=?", params[:from], params[:to]).destroy_all
     end
-    redirect_to dashboard_path
+    redirect_to return_path
   end
 
   def upload_img
@@ -174,7 +174,13 @@ class DashboardController < ApplicationController
   end
 
   protected
-  
+
+  # These two actions are now driven from /admin/tools as well as the
+  # dashboard, so they return to wherever they were called from.
+  def return_path
+    params[:from] == "admin" && @current_user.admin? ? admin_tools_path : dashboard_path
+  end
+
   def set_current_user
     @current_user = current_user
   end

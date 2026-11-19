@@ -43,15 +43,6 @@ export default class extends Controller {
     }
   }
 
-  openRemoved(){
-    let removedBox = document.getElementById("removed-text")
-    if (removedBox.classList.contains("hidden")) {
-      removedBox.classList.remove("hidden")
-    } else {
-      removedBox.classList.add("hidden")
-    }
-  }
-
   closeModal(){
     let modal = document.getElementById("chat-modal")
     modal.classList.add("hidden")

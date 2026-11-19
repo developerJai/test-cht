@@ -26,6 +26,8 @@ Rails.application.routes.draw do
       end
     end
 
+    resources :tools, only: [:index]
+
     resources :message_timestamps, only: [:index] do
       collection do
         post :preview
