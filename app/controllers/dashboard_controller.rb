@@ -2,6 +2,11 @@ class DashboardController < ApplicationController
   # How long an identical message counts as an accidental repeat.
   DOUBLE_SUBMIT_WINDOW = 3.seconds
 
+  # Checked on the server; the same numbers are handed to the browser so a
+  # file that cannot succeed is refused before it is uploaded at all.
+  MAX_IMAGE_BYTES = 10.megabytes
+  MAX_VIDEO_BYTES = 100.megabytes
+
   before_action :authorized
   before_action :set_current_user
   before_action :update_active_at
@@ -150,35 +155,15 @@ class DashboardController < ApplicationController
   end
 
   def upload_img
-    if params[:image].present?
-      # Determine recipient explicitly
-      recipient = get_conversation_partner
-      
-      # Build folder path: admin_username-person_username/uploader_username
-      folder_path = build_cloudinary_folder(@current_user, recipient)
-      
-      if params[:image].content_type.start_with?('image')
-        # Upload image to Cloudinary
-        cloud = Cloudinary::Uploader.upload(params[:image], folder: folder_path)
-      elsif params[:image].content_type.start_with?('video')
-        # Upload video to Cloudinary, specifying resource type as 'video'
-        cloud = Cloudinary::Uploader.upload(params[:image], folder: folder_path, resource_type: 'video', chunk_size: 50_000_000)
-      else
-        cloud["secure_url"] = nil
-      end
-      
-      msg = @current_user.messages.create(
-        content: "Image", 
-        image: cloud["secure_url"],
-        recipient_id: recipient&.id
-      ) if cloud["secure_url"].present?
-      
-      begin
-        send_pusher
-      rescue => e
+    result = store_upload(params[:image])
+
+    respond_to do |format|
+      format.json { render json: result, status: result[:ok] ? :ok : :unprocessable_entity }
+      format.html do
+        flash[:error] = result[:error] unless result[:ok]
+        redirect_to return_path
       end
     end
-    redirect_to dashboard_path
   end
 
   def clear_chat
@@ -240,6 +225,64 @@ class DashboardController < ApplicationController
       # Regular users always chat with admin
       User.admin_user
     end
+  end
+
+  # Uploads to Cloudinary and records the message. Returns a plain hash so
+  # the JSON and HTML paths cannot drift apart.
+  #
+  # The old version built `cloud` only inside the image and video branches
+  # and then did `cloud["secure_url"] = nil` in the else, which raised on nil
+  # for anything that was not a picture or a video.
+  def store_upload(file)
+    return { ok: false, error: "Pick a file first." } if file.blank?
+
+    # Anything that is not an uploaded file - a stray string, a JSON blob -
+    # is a bad request, not a server error.
+    unless file.respond_to?(:content_type) && file.respond_to?(:size)
+      return { ok: false, error: "That was not a file. Pick a photo or video." }
+    end
+
+    recipient = get_conversation_partner
+    return { ok: false, error: "Open a conversation before sending a file." } if recipient.blank?
+
+    content_type = file.content_type.to_s
+    kind = if content_type.start_with?("image") then :image
+           elsif content_type.start_with?("video") then :video
+           end
+    return { ok: false, error: "Only pictures and videos can be sent." } if kind.nil?
+
+    limit = kind == :video ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES
+    if file.size.to_i > limit
+      return {
+        ok: false,
+        error: "That file is #{helpers.number_to_human_size(file.size)}. " \
+               "The limit for a #{kind} is #{helpers.number_to_human_size(limit)}."
+      }
+    end
+
+    options = { folder: build_cloudinary_folder(@current_user, recipient) }
+    options.merge!(resource_type: "video", chunk_size: 20_000_000) if kind == :video
+
+    cloud = Cloudinary::Uploader.upload(file, **options)
+    url   = cloud["secure_url"]
+    return { ok: false, error: "The upload finished but came back with no file." } if url.blank?
+
+    @current_user.messages.create(
+      content: kind == :video ? "Video" : "Image",
+      image: url,
+      recipient_id: recipient.id
+    )
+
+    begin
+      send_pusher
+    rescue StandardError => e
+      Rails.logger.error("pusher after upload: #{e.class}: #{e.message}")
+    end
+
+    { ok: true, kind: kind }
+  rescue StandardError => e
+    Rails.logger.error("upload failed: #{e.class}: #{e.message}")
+    { ok: false, error: "Upload failed. #{e.message}" }
   end
 
   def build_cloudinary_folder(sender, recipient)

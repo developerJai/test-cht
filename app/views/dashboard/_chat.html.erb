@@ -34,28 +34,51 @@
               </p>
             <% end %>
           <% end %>
-          <%= form_for :file, url: upload_img_path, html: { multipart: true } do |f| %>
-            <div class="mt-1 flex max-w-md gap-x-4" data-controller="textbox">
-              <label for="file-input">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-upload" viewBox="0 0 16 16">
-                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
-                    <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"/>
-                  </svg>
+          <%= form_with url: upload_img_path, method: :post, multipart: true,
+                        id: "upload-form", data: { turbo: false,
+                                                   max_image: DashboardController::MAX_IMAGE_BYTES,
+                                                   max_video: DashboardController::MAX_VIDEO_BYTES } do %>
+            <input id="file-input" name="image" class="hidden" type="file"
+                   accept="image/*,video/*" data-action="change->chats#filePreview">
 
-                  <input id="file-input" name="image" class="hidden" type="file" data-action="change->chats#filePreview" accept="image/*,video/*" required/>
-              </label>
+            <%# nothing chosen yet: one obvious button %>
+            <label for="file-input" id="attach-button"
+                   class="inline-flex items-center gap-2 rounded-full border border-gray-300 px-3 py-2 min-h-[44px] text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-50">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+              </svg>
+              Photo or video
+            </label>
 
-              <img id="selected-image" style="display:none;" alt="Image Preview" width="100">
-              <video id="selected-video" style="display:none;" controls width="200">
-                Your browser does not support the video tag.
-              </video>
-
-              <div id="img-btns" class="hidden">
-                <div id="clear-image-btn" class="flex-none rounded-md bg-grey-200 px-3.5 py-2.5 text-sm font-semibold text-black shadow-sm hover:bg-grey-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-grey-200" data-action="click->chats#clearImg"> Clear </div>
-                <hr>
-                <div id="send-img"></div>
-                <input type="submit" id="submit-image-btn" class="flex-none rounded-md bg-gray-700 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-700" value="Send" data-action="click->chats#sendImage">
+            <%# chosen: show what it is, how big, and let it be removed %>
+            <div id="attach-card" class="hidden rounded-xl border border-gray-200 bg-gray-50 p-2">
+              <div class="flex items-center gap-3">
+                <div class="flex-shrink-0 h-14 w-14 rounded-lg bg-gray-200 overflow-hidden flex items-center justify-center">
+                  <img id="selected-image" class="hidden h-full w-full object-cover" alt="">
+                  <video id="selected-video" class="hidden h-full w-full object-cover" muted playsinline></video>
+                  <span id="attach-icon" class="hidden text-xl">📄</span>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p id="attach-name" class="truncate text-sm font-medium text-gray-900"></p>
+                  <p id="attach-meta" class="text-xs text-gray-500"></p>
+                </div>
+                <button type="button" id="attach-remove" title="Remove" aria-label="Remove"
+                        class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-200"
+                        data-action="click->chats#clearImg">✕</button>
+                <button type="submit" id="submit-image-btn"
+                        class="flex-shrink-0 h-10 px-4 rounded-full bg-gray-900 text-sm font-semibold text-white hover:bg-gray-700"
+                        data-action="click->chats#sendImage">Send</button>
               </div>
+
+              <div id="upload-progress" class="hidden mt-2">
+                <div class="h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
+                  <div id="upload-bar" class="h-full w-0 rounded-full bg-emerald-600 transition-[width] duration-150"></div>
+                </div>
+                <p id="upload-status" class="mt-1 text-xs text-gray-500">Sending…</p>
+              </div>
+
+              <p id="upload-error" class="hidden mt-2 rounded-lg bg-red-50 border border-red-200 px-2.5 py-1.5 text-xs text-red-800"></p>
             </div>
           <% end %>
 

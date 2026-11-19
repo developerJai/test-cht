@@ -257,45 +257,167 @@ export default class extends Controller {
     this.scrollMsgsBtm()
   }
 
-  clearImg(){
-    var output = document.getElementById('selected-image');
-    output.src = ""
-    document.getElementById("file-input").value = ""
-    document.getElementById("img-btns").classList.add("hidden")
+clearImg(){
+  const input = document.getElementById("file-input")
+  const img   = document.getElementById("selected-image")
+  const video = document.getElementById("selected-video")
+
+  if (img && img.src.startsWith("blob:")) URL.revokeObjectURL(img.src)
+  if (video && video.src.startsWith("blob:")) URL.revokeObjectURL(video.src)
+
+  if (input) input.value = ""
+  if (img) { img.removeAttribute("src"); img.classList.add("hidden") }
+  if (video) { video.removeAttribute("src"); video.classList.add("hidden") }
+
+  document.getElementById("attach-card").classList.add("hidden")
+  document.getElementById("attach-button").classList.remove("hidden")
+  this.resetUploadState()
+}
+
+// Picking a file: show what it is and how big before anything is sent, and
+// refuse one that is already over the limit rather than uploading it first.
+filePreview(event) {
+  const input = event.target
+  const file  = input.files && input.files[0]
+  if (!file) return
+
+  const form     = document.getElementById("upload-form")
+  const maxImage = parseInt(form.dataset.maxImage || "0", 10)
+  const maxVideo = parseInt(form.dataset.maxVideo || "0", 10)
+
+  const isImage = file.type.startsWith("image/")
+  const isVideo = file.type.startsWith("video/")
+  const limit   = isVideo ? maxVideo : maxImage
+
+  this.resetUploadState()
+
+  if (!isImage && !isVideo) {
+    this.showUploadError("Only pictures and videos can be sent.")
+    input.value = ""
+    return
   }
 
-  filePreview() {
-    var file = event.target.files[0];
-    var outputImage = document.getElementById('selected-image');
-    var outputVideo = document.getElementById('selected-video'); // Assuming you have a video element for preview
-    var fileType = file.type;
+  if (limit && file.size > limit) {
+    this.showUploadError(
+      "That file is " + this.humanSize(file.size) + ". The limit is " + this.humanSize(limit) + "."
+    )
+    input.value = ""
+    return
+  }
 
-    // Hide both preview elements initially
-    outputImage.style.display = 'none';
-    outputVideo.style.display = 'none';
+  const img   = document.getElementById("selected-image")
+  const video = document.getElementById("selected-video")
+  const icon  = document.getElementById("attach-icon")
+  const url   = URL.createObjectURL(file)
 
-    if (fileType.startsWith('image/')) {
-      // If it's an image, preview the image
-      outputImage.src = URL.createObjectURL(file);
-      outputImage.style.display = 'block';
-      document.getElementById("img-btns").classList.remove("hidden");
-      outputImage.onload = function() {
-        URL.revokeObjectURL(outputImage.src); // Free memory
-      };
-    } else if (fileType.startsWith('video/')) {
-      // If it's a video, preview the video
-      outputVideo.src = URL.createObjectURL(file);
-      outputVideo.style.display = 'block';
-      document.getElementById("img-btns").classList.remove("hidden");
-      outputVideo.onload = function() {
-        URL.revokeObjectURL(outputVideo.src); // Free memory
-      };
+  img.classList.add("hidden")
+  video.classList.add("hidden")
+  icon.classList.add("hidden")
+
+  if (isImage) {
+    img.src = url
+    img.classList.remove("hidden")
+  } else {
+    video.src = url
+    video.classList.remove("hidden")
+  }
+
+  document.getElementById("attach-name").textContent = file.name
+  document.getElementById("attach-meta").textContent =
+    (isVideo ? "Video · " : "Photo · ") + this.humanSize(file.size)
+
+  document.getElementById("attach-card").classList.remove("hidden")
+  document.getElementById("attach-button").classList.add("hidden")
+}
+
+// Upload over XHR so there is a real progress bar. A large video used to
+// block the page with no feedback at all, because the form posted normally
+// and the Cloudinary upload ran inside that request.
+sendImage(event) {
+  event.preventDefault()
+
+  const form  = document.getElementById("upload-form")
+  const input = document.getElementById("file-input")
+  const file  = input.files && input.files[0]
+  if (!file) return
+
+  const button   = document.getElementById("submit-image-btn")
+  const progress = document.getElementById("upload-progress")
+  const bar      = document.getElementById("upload-bar")
+  const status   = document.getElementById("upload-status")
+
+  this.hideUploadError()
+  progress.classList.remove("hidden")
+  button.disabled = true
+  button.textContent = "Sending…"
+  bar.style.width = "0%"
+
+  const xhr = new XMLHttpRequest()
+  xhr.open("POST", form.action, true)
+  xhr.setRequestHeader("Accept", "application/json")
+
+  xhr.upload.onprogress = (e) => {
+    if (!e.lengthComputable) return
+    const pct = Math.round((e.loaded / e.total) * 100)
+    bar.style.width = pct + "%"
+    status.textContent = pct < 100
+      ? "Sending… " + pct + "% of " + this.humanSize(e.total)
+      : "Finishing up on the server…"
+  }
+
+  xhr.onload = () => {
+    let body = {}
+    try { body = JSON.parse(xhr.responseText) } catch (err) { /* keep {} */ }
+
+    if (xhr.status >= 200 && xhr.status < 300 && body.ok) {
+      this.clearImg()
+      this.reloadConversation()
+    } else {
+      this.showUploadError(body.error || "Upload failed. Please try again.")
+      progress.classList.add("hidden")
     }
+
+    button.disabled = false
+    button.textContent = "Send"
   }
 
-  sendImage(){
-    document.getElementById("send-img").innerText = "Sending wait please..."
+  xhr.onerror = () => {
+    this.showUploadError("The connection dropped before the file finished.")
+    progress.classList.add("hidden")
+    button.disabled = false
+    button.textContent = "Send"
   }
+
+  xhr.send(new FormData(form))
+}
+
+humanSize(bytes) {
+  if (!bytes) return "0 B"
+  const units = ["B", "KB", "MB", "GB"]
+  let n = bytes, i = 0
+  while (n >= 1024 && i < units.length - 1) { n = n / 1024; i++ }
+  return (i === 0 ? n : n.toFixed(1)) + " " + units[i]
+}
+
+showUploadError(message) {
+  const box = document.getElementById("upload-error")
+  if (!box) return
+  box.textContent = message
+  box.classList.remove("hidden")
+}
+
+hideUploadError() {
+  const box = document.getElementById("upload-error")
+  if (box) box.classList.add("hidden")
+}
+
+resetUploadState() {
+  this.hideUploadError()
+  const progress = document.getElementById("upload-progress")
+  if (progress) progress.classList.add("hidden")
+  const bar = document.getElementById("upload-bar")
+  if (bar) bar.style.width = "0%"
+}
 
   openImageModal(){
     const modalId = event.currentTarget.getAttribute("data-modal-target")
