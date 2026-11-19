@@ -61,12 +61,16 @@
       });
 
       var channel = pusher.subscribe('my-channel-<%=@current_user&.id%>');
+      // Which conversation is open. Switching updates this without a reload,
+      // so it must be a live value and not baked into the handler.
+      window.selectedUserId = <%= session[:selected_user_id] || 'null' %>;
+
       channel.bind('my-event', function(data) {
         console.log('Pusher message received:', data);
         
         // Check if user is admin and if message is from a different user than currently selected
         const isAdmin = <%= @current_user&.admin? || false %>;
-        const selectedUserId = <%= session[:selected_user_id] || 'null' %>;
+        const selectedUserId = window.selectedUserId;
         const senderId = data.sender_id;
         
         if (isAdmin && selectedUserId && senderId) {

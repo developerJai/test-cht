@@ -51,6 +51,97 @@ export default class extends Controller {
     }
   }
 
+  // Switch conversation without reloading the page.
+  //
+  // The session is the single source of truth for who the admin is talking
+  // to: sending, polling and Pusher all read it server side. So we ask the
+  // server to switch FIRST, and only redraw once it confirms. Doing it the
+  // other way round would leave a window where the screen shows one person
+  // and a sent message goes to another.
+  switchUser(event){
+    event.preventDefault()
+
+    const link   = event.currentTarget
+    const userId = link.getAttribute("data-user-id")
+    if (!userId) return
+
+    if (this.switching) return
+    this.switching = true
+    link.style.opacity = "0.5"
+
+    fetch(link.href, {
+      headers: { "Accept": "application/json", "X-Requested-With": "XMLHttpRequest" },
+      credentials: "same-origin"
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("switch failed: " + response.status)
+        return response.json()
+      })
+      .then((data) => {
+        if (!data.ok) throw new Error("server did not switch")
+
+        // Keep the Pusher handler pointed at the conversation now on screen.
+        window.selectedUserId = data.selected_user_id
+
+        this.markActiveChip(userId)
+        this.clearBadge(link)
+        this.clearComposer()
+        this.reloadConversation()
+      })
+      .catch((error) => {
+        // Never leave the screen showing one person while the server thinks
+        // another - fall back to a full load, which cannot disagree.
+        console.error(error)
+        window.location.href = link.href
+      })
+      .finally(() => {
+        this.switching = false
+        link.style.opacity = ""
+      })
+  }
+
+  markActiveChip(userId){
+    document.querySelectorAll("a[data-user-id]").forEach((chip) => {
+      const on = chip.getAttribute("data-user-id") === String(userId)
+      chip.classList.toggle("bg-gray-900", on)
+      chip.classList.toggle("text-white", on)
+      chip.classList.toggle("bg-white", !on)
+      chip.classList.toggle("text-gray-900", !on)
+      chip.classList.toggle("border", !on)
+      chip.classList.toggle("border-gray-200", !on)
+
+      const avatar = chip.querySelector("span")
+      if (avatar) {
+        avatar.classList.toggle("bg-white/20", on)
+        avatar.classList.toggle("text-white", on)
+        avatar.classList.toggle("bg-blue-100", !on)
+        avatar.classList.toggle("text-blue-700", !on)
+      }
+    })
+  }
+
+  clearBadge(link){
+    const badge = link.querySelector(".unseen-badge")
+    if (badge) badge.remove()
+  }
+
+  // A half typed message belongs to the conversation it was typed in.
+  clearComposer(){
+    const box = document.getElementById("text-message")
+    if (box) box.value = ""
+    const replyId = document.getElementById("reply-to-id")
+    if (replyId) replyId.value = ""
+    const replyBox = document.getElementById("reply-msg-box")
+    if (replyBox) replyBox.classList.add("hidden")
+  }
+
+  reloadConversation(){
+    const msgFrame = document.getElementById("messages_list")
+    if (!msgFrame) return
+    msgFrame.src = "/dash"
+    msgFrame.reload()
+  }
+
   openModal(){
     let modal = document.getElementById("chat-modal")
     if(modal.classList.contains("hidden")){

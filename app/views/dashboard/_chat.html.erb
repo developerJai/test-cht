@@ -13,7 +13,7 @@
                   <% unseen_count = @unseen_counts&.fetch(user.id, 0) || 0 %>
                   <% active = @person&.id == user.id %>
                   <%= link_to switch_user_path(selected_user_id: user.id),
-                        data: { user_id: user.id },
+                        data: { user_id: user.id, action: "click->chats#switchUser" },
                         class: "flex items-center gap-2 rounded-full pl-1.5 pr-3 py-1.5 min-h-[44px] whitespace-nowrap #{active ? 'bg-gray-900 text-white' : 'bg-white text-gray-900 border border-gray-200 hover:bg-gray-50'}" do %>
                     <span class="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold <%= active ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700' %>">
                       <%= user.username[0].upcase %>

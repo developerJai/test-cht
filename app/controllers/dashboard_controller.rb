@@ -1,4 +1,7 @@
 class DashboardController < ApplicationController
+  # How long an identical message counts as an accidental repeat.
+  DOUBLE_SUBMIT_WINDOW = 3.seconds
+
   before_action :authorized
   before_action :set_current_user
   before_action :update_active_at
@@ -50,15 +53,27 @@ class DashboardController < ApplicationController
   end
 
   def switch_user
+    # Only an admin has more than one conversation, so only an admin can switch.
     if @current_user.admin?
-      session[:selected_user_id] = params[:selected_user_id]
-      
-      # Update conversation activity when switching to a user
-      selected_user = User.find_by(id: session[:selected_user_id])
-      update_conversation_activity(@current_user, selected_user) if selected_user.present?
+      selected_user = User.find_by(id: params[:selected_user_id])
+
+      if selected_user.present? && selected_user.id != @current_user.id
+        session[:selected_user_id] = selected_user.id
+        update_conversation_activity(@current_user, selected_user)
+      end
     end
-    
-    redirect_to dashboard_path
+
+    respond_to do |format|
+      format.html { redirect_to dashboard_path }
+      format.json do
+        partner = get_conversation_partner
+        render json: {
+          ok: partner.present?,
+          selected_user_id: partner&.id,
+          username: partner&.username
+        }
+      end
+    end
   end
 
   def send_message
@@ -77,12 +92,22 @@ class DashboardController < ApplicationController
 
     prev_msg = Message.where(user_id: @current_user.id, recipient_id: recipient&.id).recent_messages.first
 
-    # Create message with explicit sender and recipient
+    # Guard against a double submit - the same text arriving twice because a
+    # button was tapped twice or a request was retried.
+    #
+    # This used to compare content alone, with no time limit, so a message
+    # identical to the previous one was dropped forever: "ok" could never be
+    # sent twice in a row. It returned 200 either way, so the message simply
+    # vanished. The window makes it a double-submit guard again.
+    double_submit = prev_msg.present? &&
+                    prev_msg.content == data &&
+                    prev_msg.created_at > DOUBLE_SUBMIT_WINDOW.ago
+
     msg = @current_user.messages.create(
-      content: data, 
+      content: data,
       reply_for: reply_for,
       recipient_id: recipient&.id
-    ) if prev_msg&.content != data
+    ) unless double_submit
 
     send_pusher
 
