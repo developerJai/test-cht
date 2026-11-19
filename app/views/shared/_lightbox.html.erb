@@ -1,6 +1,9 @@
 <div id="lightbox" class="hidden fixed inset-0 z-[9999] bg-black/95 select-none">
   <div class="absolute top-0 inset-x-0 z-10 flex items-center justify-between gap-2 p-3 text-white bg-gradient-to-b from-black/80 via-black/50 to-transparent pb-8">
-    <span id="lightbox-caption" class="min-w-0 truncate text-xs text-white/90 drop-shadow"></span>
+    <span class="min-w-0 flex items-center gap-2">
+      <span id="lightbox-caption" class="min-w-0 truncate text-xs text-white/90 drop-shadow"></span>
+      <span id="lightbox-count" class="flex-shrink-0 text-xs tabular-nums text-white/60"></span>
+    </span>
     <div class="flex items-center gap-1.5">
       <button type="button" id="lightbox-out"   title="Zoom out" aria-label="Zoom out"
               class="h-11 w-11 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 ring-1 ring-white/25 backdrop-blur-sm text-xl leading-none">−</button>
@@ -14,13 +17,18 @@
     </div>
   </div>
 
+  <button type="button" id="lightbox-prev" title="Previous" aria-label="Previous"
+          class="hidden absolute left-2 top-1/2 z-10 -translate-y-1/2 h-12 w-12 items-center justify-center rounded-full bg-black/50 text-2xl text-white ring-1 ring-white/25 backdrop-blur-sm">‹</button>
+  <button type="button" id="lightbox-next" title="Next" aria-label="Next"
+          class="hidden absolute right-2 top-1/2 z-10 -translate-y-1/2 h-12 w-12 items-center justify-center rounded-full bg-black/50 text-2xl text-white ring-1 ring-white/25 backdrop-blur-sm">›</button>
+
   <div id="lightbox-stage" class="absolute inset-0 overflow-hidden flex items-center justify-center" style="touch-action: none;">
     <img   id="lightbox-img"   class="hidden max-w-full max-h-full will-change-transform" alt="">
     <video id="lightbox-video" class="hidden max-w-full max-h-full" controls playsinline></video>
   </div>
 
   <p class="absolute bottom-0 inset-x-0 px-3 pt-8 pb-3 text-center text-[11px] text-white/60 pointer-events-none bg-gradient-to-t from-black/80 to-transparent">
-    Pinch or scroll to zoom · drag to move · double tap to zoom · tap outside to close
+    Pinch or scroll to zoom · drag to move · swipe or ‹ › for the next one · tap outside to close
   </p>
 </div>
 
@@ -33,7 +41,8 @@
   var scale = 1, tx = 0, ty = 0;
   var MIN = 1, MAX = 8;
   var pointers = new Map(), pinchDist = 0, pinchScale = 1;
-  var dragging = false, lastX = 0, lastY = 0, movedBy = 0;
+  var gallery = [], index = 0;
+  var dragging = false, lastX = 0, lastY = 0, movedBy = 0, lastDownX = 0;
   var lastTap = 0;
 
   function grab() {
@@ -43,6 +52,13 @@
     video   = document.getElementById('lightbox-video');
     caption = document.getElementById('lightbox-caption');
     level   = document.getElementById('lightbox-level');
+    if (stage && !stage.__lightboxBound) { stage.__lightboxBound = true; bindStage(); }
+    if (box && !box.__lightboxControls) {
+      box.__lightboxControls = true;
+      box.addEventListener('click', lightboxControl);
+      // Looking at a picture must not close the conversation behind it.
+      box.addEventListener('click', function (e) { e.stopPropagation(); });
+    }
     return !!box;
   }
 
@@ -70,9 +86,43 @@
     apply();
   }
 
-  window.openLightbox = function (url, type, label) {
-    if (!box && !grab()) return;
+  // Everything on the page that can be opened, so one picture becomes a set
+  // you can move through rather than something to close and reopen.
+  function collectGallery(current) {
+    gallery = Array.from(document.querySelectorAll('[data-lightbox-url]')).map(function (el) {
+      return {
+        url: el.getAttribute('data-lightbox-url'),
+        type: el.getAttribute('data-lightbox-type') || 'image',
+        label: el.getAttribute('data-lightbox-label') || ''
+      };
+    });
+    index = gallery.findIndex(function (item) { return item.url === current; });
+    if (index < 0) index = 0;
+  }
+
+  function showCurrent() {
+    var item = gallery[index];
+    if (!item) return;
+    render(item.url, item.type, item.label);
+
+    var many = gallery.length > 1;
+    document.getElementById('lightbox-prev').classList.toggle('hidden', !many);
+    document.getElementById('lightbox-prev').classList.toggle('flex', many);
+    document.getElementById('lightbox-next').classList.toggle('hidden', !many);
+    document.getElementById('lightbox-next').classList.toggle('flex', many);
+
+    var counter = document.getElementById('lightbox-count');
+    if (counter) counter.textContent = many ? (index + 1) + ' / ' + gallery.length : '';
+  }
+
+  window.lightboxStep = function (delta) {
+    if (!gallery.length) return;
+    index = (index + delta + gallery.length) % gallery.length;
     reset();
+    showCurrent();
+  };
+
+  function render(url, type, label) {
     caption.textContent = label || '';
 
     if (type === 'video') {
@@ -87,6 +137,13 @@
       img.src = url;
     }
 
+  }
+
+  window.openLightbox = function (url, type, label) {
+    if (!grab()) return;
+    reset();
+    collectGallery(url);
+    showCurrent();
     box.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
   };
@@ -99,6 +156,24 @@
     video.removeAttribute('src');
     img.removeAttribute('src');
   };
+
+  function lightboxControl(e) {
+      if (!e.target.closest) return;
+      var hit = e.target.closest('#lightbox-close, #lightbox-in, #lightbox-out, #lightbox-reset, #lightbox-prev, #lightbox-next');
+      if (!hit) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (!grab()) return;
+
+      switch (hit.id) {
+        case 'lightbox-close': window.closeLightbox(); break;
+        case 'lightbox-in':    zoomAt(clampScale(scale * 1.4), window.innerWidth / 2, window.innerHeight / 2); break;
+        case 'lightbox-out':   zoomAt(clampScale(scale / 1.4), window.innerWidth / 2, window.innerHeight / 2); break;
+        case 'lightbox-reset': reset(); break;
+        case 'lightbox-prev':  window.lightboxStep(-1); break;
+        case 'lightbox-next':  window.lightboxStep(1); break;
+      }
+  }
 
   document.addEventListener('DOMContentLoaded', function () {
     if (!grab()) return;
@@ -115,18 +190,7 @@
       );
     });
 
-    // The chat hides itself on any outside click. Keep ours to ourselves so
-    // closing the picture does not also close the conversation behind it.
-    box.addEventListener('click', function (e) { e.stopPropagation(); });
 
-    document.getElementById('lightbox-close').addEventListener('click', window.closeLightbox);
-    document.getElementById('lightbox-in').addEventListener('click', function () {
-      zoomAt(clampScale(scale * 1.4), window.innerWidth / 2, window.innerHeight / 2);
-    });
-    document.getElementById('lightbox-out').addEventListener('click', function () {
-      zoomAt(clampScale(scale / 1.4), window.innerWidth / 2, window.innerHeight / 2);
-    });
-    document.getElementById('lightbox-reset').addEventListener('click', reset);
 
     document.addEventListener('keydown', function (e) {
       if (box.classList.contains('hidden')) return;
@@ -134,8 +198,14 @@
       if (e.key === '+' || e.key === '=') zoomAt(clampScale(scale * 1.4), innerWidth / 2, innerHeight / 2);
       if (e.key === '-') zoomAt(clampScale(scale / 1.4), innerWidth / 2, innerHeight / 2);
       if (e.key === '0') reset();
+      if (e.key === 'ArrowLeft') window.lightboxStep(-1);
+      if (e.key === 'ArrowRight') window.lightboxStep(1);
     });
 
+    bindStage();
+  });
+
+  function bindStage() {
     // Desktop wheel zoom.
     stage.addEventListener('wheel', function (e) {
       e.preventDefault();
@@ -156,7 +226,7 @@
         pinchScale = scale;
         dragging = false;
       } else {
-        dragging = true; lastX = e.clientX; lastY = e.clientY; movedBy = 0;
+        dragging = true; lastX = e.clientX; lastY = e.clientY; movedBy = 0; lastDownX = e.clientX;
       }
     });
 
@@ -192,6 +262,14 @@
     // Tap the backdrop to close; double tap the picture to zoom.
     stage.addEventListener('pointerup', function (e) {
       var onMedia = e.target === img || e.target === video;
+
+      // Sideways swipe moves through the set - only at normal zoom, since
+      // once zoomed in a drag is panning the picture.
+      if (scale === MIN && gallery.length > 1 && Math.abs(e.clientX - lastDownX) > 60) {
+        window.lightboxStep(e.clientX < lastDownX ? 1 : -1);
+        return;
+      }
+
       if (!onMedia && movedBy < 8 && scale === MIN) { window.closeLightbox(); return; }
 
       if (onMedia && e.pointerType === 'touch') {
@@ -200,6 +278,6 @@
         lastTap = now;
       }
     });
-  });
+  }
 })();
 </script>

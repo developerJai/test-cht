@@ -308,7 +308,16 @@
     </div>
 
     <script>
-      // PWA Installation - Capture install prompt early
+      // PWA Installation - Capture install prompt early.
+      //
+      // Scoped and guarded on purpose: Turbo runs inline scripts again on
+      // every visit, and a bare `let` at the top level makes the SECOND
+      // navigation throw inside Turbo itself, which silently leaves the old
+      // body on screen under the new URL.
+      (function () {
+        if (window.__pwaScriptReady) return;
+        window.__pwaScriptReady = true;
+
       let deferredPrompt;
 
       window.addEventListener('beforeinstallprompt', (e) => {
@@ -330,17 +339,15 @@
           });
         }
 
-        // Setup Install Button
-        const installBtn = document.getElementById('installBtn');
-        if (installBtn) {
-          console.log('Install button found, attaching click handler');
-          
-          // Detect mobile device
-          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-          const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-          const isAndroid = /Android/i.test(navigator.userAgent);
-          
-          installBtn.addEventListener('click', async () => {
+        // Setup Install Button, by delegation so it survives a Turbo visit.
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const isAndroid = /Android/i.test(navigator.userAgent);
+
+        {
+          document.addEventListener('click', async (event) => {
+            const installBtn = event.target.closest && event.target.closest('#installBtn');
+            if (!installBtn) return;
             console.log('Install button clicked. deferredPrompt:', deferredPrompt);
             
             if (deferredPrompt) {
@@ -397,6 +404,7 @@
           });
         }
       });
+      })();
     </script>
     <%= render "shared/lightbox" %>
   </body>
