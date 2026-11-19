@@ -56,6 +56,30 @@ class Admin::MessageTimestampsController < ApplicationController
     redirect_with(outcome[:ok] ? :success : :error, outcome[:message])
   end
 
+  # How far back the chat shows messages. Nothing is deleted either way -
+  # widening the window brings older messages straight back.
+  def settings
+    value, unit = if params[:preset].present?
+      params[:preset].to_s.split("-", 2)
+    else
+      [params[:message_window_value], params[:message_window_unit]]
+    end
+
+    number = value.to_f
+    hours  = unit.to_s == "days" ? number * 24 : number
+
+    if number <= 0
+      return redirect_with(:error, "Enter a window greater than zero.")
+    end
+
+    if hours > Setting::MAX_WINDOW_HOURS
+      return redirect_with(:error, "That is longer than the maximum of #{(Setting::MAX_WINDOW_HOURS / 24).round} days.")
+    end
+
+    Setting.set(Setting::MESSAGE_WINDOW, hours)
+    redirect_with(:success, "The chat now shows the last #{Setting.message_window_label}.")
+  end
+
   private
 
   def set_current_user
@@ -88,8 +112,26 @@ class Admin::MessageTimestampsController < ApplicationController
   def load_messages
     @users = User.order(:id).to_a
     @pair_a = params[:pair_a].presence
-    # Defaults to the admin: there are no user-to-user conversations.
-    @pair_b = params[:pair_b].presence || User.admin_user&.id&.to_s
+
+    # The other side is ALWAYS the admin - there are no user-to-user threads,
+    # so offering a free choice here only ever produced empty results.
+    admin   = User.admin_user
+    @pair_b = admin&.id&.to_s
+    @selectable_users = @users.reject { |u| u.id == admin&.id }
+
+    # Counts for the visibility-window card.
+    cutoff          = Setting.message_window_cutoff
+    @window_total   = Message.count
+    @window_visible = Message.where("created_at >= ?", cutoff).count
+    @window_hidden  = @window_total - @window_visible
+    hours           = Setting.message_window_hours
+    if hours >= 48 && (hours % 24).zero?
+      @window_value = (hours / 24).round
+      @window_unit  = "days"
+    else
+      @window_value = hours.round
+      @window_unit  = "hours"
+    end
 
     scope = Message.all
 

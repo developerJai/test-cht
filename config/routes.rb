@@ -30,6 +30,7 @@ Rails.application.routes.draw do
 
     resources :message_timestamps, only: [:index] do
       collection do
+        post :settings
         post :preview
         post :apply
       end
