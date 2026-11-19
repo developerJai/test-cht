@@ -29,7 +29,7 @@ Rails.application.routes.draw do
     end
 
     resources :tools, only: [:index]
-    resources :images, only: [:index]
+    resources :images, only: [:index, :destroy]
     get    "cloudinary", to: "cloudinary#index",   as: :cloudinary
     delete "cloudinary", to: "cloudinary#destroy"
 
