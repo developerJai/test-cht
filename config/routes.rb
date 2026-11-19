@@ -27,6 +27,7 @@ Rails.application.routes.draw do
     end
 
     resources :tools, only: [:index]
+    resources :images, only: [:index]
 
     resources :message_timestamps, only: [:index] do
       collection do

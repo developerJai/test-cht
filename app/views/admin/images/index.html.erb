@@ -1,0 +1,100 @@
+<div class="bg-gray-50 min-h-screen">
+  <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+    <div class="mb-6 sm:flex sm:items-center sm:justify-between gap-4">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">🖼️ Shared Images</h1>
+        <p class="mt-1 text-sm text-gray-600">
+          Every picture sent in a conversation, newest first. Tap a name to show it.
+        </p>
+      </div>
+      <div class="mt-4 flex flex-wrap gap-2 sm:mt-0">
+        <a href="<%= admin_users_path %>" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700">👥 Users</a>
+        <a href="<%= admin_message_timestamps_path %>" class="inline-flex items-center justify-center px-4 py-2 bg-white text-gray-800 border border-gray-300 text-sm font-semibold rounded-lg hover:bg-gray-50">🕒 Timing</a>
+        <a href="<%= dashboard_path %>" class="inline-flex items-center justify-center px-4 py-2 bg-gray-600 text-white text-sm font-semibold rounded-lg hover:bg-gray-700">← Dashboard</a>
+      </div>
+    </div>
+
+    <div class="mb-4 rounded-xl border border-gray-200 bg-white p-4">
+      <%= form_with url: admin_images_path, method: :get, class: "flex flex-wrap items-center gap-2" do %>
+        <label class="text-sm font-medium text-gray-700">Whose pictures?</label>
+        <select name="user_id" class="rounded-lg border border-gray-300 p-2 text-sm min-w-[10rem]">
+          <option value="">— everyone —</option>
+          <% @users.each do |u| %>
+            <option value="<%= u.id %>" <%= "selected" if @user_id.to_s == u.id.to_s %>><%= u.username %></option>
+          <% end %>
+        </select>
+        <button type="submit" class="px-4 py-2 bg-gray-900 text-white text-sm font-semibold rounded-lg hover:bg-gray-700">Show</button>
+        <span class="text-xs text-gray-500"><%= pluralize(@total, "picture") %></span>
+      <% end %>
+    </div>
+
+    <% if @groups.empty? %>
+      <div class="rounded-xl border border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
+        No pictures have been shared yet.
+      </div>
+    <% end %>
+
+    <% @groups.each do |user_id, messages| %>
+      <div class="mb-4 rounded-xl border border-gray-200 bg-white overflow-hidden">
+        <div class="flex items-center justify-between gap-3 px-4 py-3 border-b border-gray-200 bg-gray-50">
+          <h2 class="font-semibold text-gray-900">
+            <%= @usernames[user_id] || "unknown (id #{user_id})" %>
+          </h2>
+          <span class="text-xs text-gray-500"><%= pluralize(messages.size, "picture") %></span>
+        </div>
+
+        <ul class="divide-y divide-gray-100">
+          <% messages.each do |msg| %>
+            <% url  = msg.image.to_s %>
+            <% name = begin
+                        File.basename(URI.parse(url).path)
+                      rescue StandardError
+                        "image-#{msg.id}"
+                      end %>
+            <li class="px-4 py-3">
+              <button type="button" onclick="toggleImage(<%= msg.id %>)"
+                      id="img-btn-<%= msg.id %>" aria-controls="img-<%= msg.id %>" aria-expanded="false"
+                      class="w-full flex items-start gap-3 text-left group">
+                <span class="flex-shrink-0 mt-0.5 text-gray-400 group-hover:text-gray-600">🖼️</span>
+                <span class="min-w-0 flex-1">
+                  <span class="block text-sm font-medium text-blue-700 group-hover:underline break-all"><%= name %></span>
+                  <span class="block text-xs text-gray-500">
+                    #<%= msg.id %> ·
+                    <%= @usernames[msg.user_id] || msg.user_id %> → <%= @usernames[msg.recipient_id] || "—" %> ·
+                    <%= msg.created_at.in_time_zone("Asia/Kolkata").strftime("%d %b %Y %H:%M") %> IST
+                  </span>
+                </span>
+                <span class="flex-shrink-0 text-xs text-gray-400">show</span>
+              </button>
+
+              <div id="img-<%= msg.id %>" class="hidden mt-3">
+                <img src="<%= url %>" alt="<%= name %>" loading="lazy"
+                     class="max-h-96 w-auto rounded-lg border border-gray-200">
+                <p class="mt-1">
+                  <a href="<%= url %>" target="_blank" rel="noopener noreferrer"
+                     class="text-xs text-gray-500 underline">open full size</a>
+                </p>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+  </div>
+</div>
+
+<script>
+  function toggleImage(id) {
+    var panel = document.getElementById('img-' + id);
+    var btn   = document.getElementById('img-btn-' + id);
+    if (!panel) return;
+    var open = panel.classList.toggle('hidden') === false;
+    if (btn) {
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      var label = btn.querySelector('span:last-child');
+      if (label) label.textContent = open ? 'hide' : 'show';
+    }
+  }
+</script>
