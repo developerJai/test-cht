@@ -106,12 +106,10 @@ class DashboardController < ApplicationController
   end
 
   def text_removed_clear
-    if params[:guest].present?
-      if @current_user.admin?
-        @person = User.find_by(id: session[:selected_user_id]) || User.where.not(id: @current_user.id).first
-      else
-        @person = User.admin_user
-      end
+    # The guest branch clears someone else's drafts, so it is admin-only.
+    # Anyone else lands on the same path as a plain clear: their own.
+    if params[:guest].present? && @current_user.admin?
+      @person = User.find_by(id: session[:selected_user_id]) || User.where.not(id: @current_user.id).first
       @person&.removed_texts&.order(created_at: "DESC")&.paginate(page: 1, per_page: 20)&.destroy_all
     else
       @current_user.removed_texts.destroy_all
