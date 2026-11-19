@@ -1,0 +1,205 @@
+<div id="lightbox" class="hidden fixed inset-0 z-[9999] bg-black/95 select-none">
+  <div class="absolute top-0 inset-x-0 z-10 flex items-center justify-between gap-2 p-3 text-white bg-gradient-to-b from-black/80 via-black/50 to-transparent pb-8">
+    <span id="lightbox-caption" class="min-w-0 truncate text-xs text-white/90 drop-shadow"></span>
+    <div class="flex items-center gap-1.5">
+      <button type="button" id="lightbox-out"   title="Zoom out" aria-label="Zoom out"
+              class="h-11 w-11 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 ring-1 ring-white/25 backdrop-blur-sm text-xl leading-none">−</button>
+      <span id="lightbox-level" class="w-12 text-center text-xs tabular-nums text-white/90 drop-shadow">100%</span>
+      <button type="button" id="lightbox-in"    title="Zoom in" aria-label="Zoom in"
+              class="h-11 w-11 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 ring-1 ring-white/25 backdrop-blur-sm text-xl leading-none">+</button>
+      <button type="button" id="lightbox-reset" title="Fit to screen" aria-label="Fit to screen"
+              class="h-11 px-3 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 ring-1 ring-white/25 backdrop-blur-sm text-xs font-semibold">Fit</button>
+      <button type="button" id="lightbox-close" title="Close" aria-label="Close"
+              class="h-11 w-11 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 ring-1 ring-white/25 backdrop-blur-sm text-xl leading-none">×</button>
+    </div>
+  </div>
+
+  <div id="lightbox-stage" class="absolute inset-0 overflow-hidden flex items-center justify-center" style="touch-action: none;">
+    <img   id="lightbox-img"   class="hidden max-w-full max-h-full will-change-transform" alt="">
+    <video id="lightbox-video" class="hidden max-w-full max-h-full" controls playsinline></video>
+  </div>
+
+  <p class="absolute bottom-0 inset-x-0 px-3 pt-8 pb-3 text-center text-[11px] text-white/60 pointer-events-none bg-gradient-to-t from-black/80 to-transparent">
+    Pinch or scroll to zoom · drag to move · double tap to zoom · tap outside to close
+  </p>
+</div>
+
+<script>
+(function () {
+  if (window.__lightboxReady) return;
+  window.__lightboxReady = true;
+
+  var box, stage, img, video, caption, level;
+  var scale = 1, tx = 0, ty = 0;
+  var MIN = 1, MAX = 8;
+  var pointers = new Map(), pinchDist = 0, pinchScale = 1;
+  var dragging = false, lastX = 0, lastY = 0, movedBy = 0;
+  var lastTap = 0;
+
+  function grab() {
+    box     = document.getElementById('lightbox');
+    stage   = document.getElementById('lightbox-stage');
+    img     = document.getElementById('lightbox-img');
+    video   = document.getElementById('lightbox-video');
+    caption = document.getElementById('lightbox-caption');
+    level   = document.getElementById('lightbox-level');
+    return !!box;
+  }
+
+  function apply() {
+    var el = img.classList.contains('hidden') ? video : img;
+    el.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+    if (level) level.textContent = Math.round(scale * 100) + '%';
+    el.style.cursor = scale > 1 ? 'grab' : 'default';
+  }
+
+  function reset() { scale = 1; tx = 0; ty = 0; apply(); }
+
+  function clampScale(v) { return Math.min(MAX, Math.max(MIN, v)); }
+
+  // Zoom about a point so the thing under the finger stays under the finger.
+  function zoomAt(nextScale, cx, cy) {
+    var rect = stage.getBoundingClientRect();
+    var ox = cx - rect.left - rect.width / 2;
+    var oy = cy - rect.top - rect.height / 2;
+    var ratio = nextScale / scale;
+    tx = ox - ratio * (ox - tx);
+    ty = oy - ratio * (oy - ty);
+    scale = nextScale;
+    if (scale === MIN) { tx = 0; ty = 0; }
+    apply();
+  }
+
+  window.openLightbox = function (url, type, label) {
+    if (!box && !grab()) return;
+    reset();
+    caption.textContent = label || '';
+
+    if (type === 'video') {
+      img.classList.add('hidden');
+      img.removeAttribute('src');
+      video.classList.remove('hidden');
+      video.src = url;
+    } else {
+      video.classList.add('hidden');
+      video.removeAttribute('src');
+      img.classList.remove('hidden');
+      img.src = url;
+    }
+
+    box.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeLightbox = function () {
+    if (!box && !grab()) return;
+    box.classList.add('hidden');
+    document.body.style.overflow = '';
+    video.pause && video.pause();
+    video.removeAttribute('src');
+    img.removeAttribute('src');
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!grab()) return;
+
+    // Anything carrying data-lightbox-url opens it.
+    document.addEventListener('click', function (e) {
+      var trigger = e.target.closest ? e.target.closest('[data-lightbox-url]') : null;
+      if (!trigger) return;
+      e.preventDefault();
+      window.openLightbox(
+        trigger.getAttribute('data-lightbox-url'),
+        trigger.getAttribute('data-lightbox-type') || 'image',
+        trigger.getAttribute('data-lightbox-label') || ''
+      );
+    });
+
+    // The chat hides itself on any outside click. Keep ours to ourselves so
+    // closing the picture does not also close the conversation behind it.
+    box.addEventListener('click', function (e) { e.stopPropagation(); });
+
+    document.getElementById('lightbox-close').addEventListener('click', window.closeLightbox);
+    document.getElementById('lightbox-in').addEventListener('click', function () {
+      zoomAt(clampScale(scale * 1.4), window.innerWidth / 2, window.innerHeight / 2);
+    });
+    document.getElementById('lightbox-out').addEventListener('click', function () {
+      zoomAt(clampScale(scale / 1.4), window.innerWidth / 2, window.innerHeight / 2);
+    });
+    document.getElementById('lightbox-reset').addEventListener('click', reset);
+
+    document.addEventListener('keydown', function (e) {
+      if (box.classList.contains('hidden')) return;
+      if (e.key === 'Escape') window.closeLightbox();
+      if (e.key === '+' || e.key === '=') zoomAt(clampScale(scale * 1.4), innerWidth / 2, innerHeight / 2);
+      if (e.key === '-') zoomAt(clampScale(scale / 1.4), innerWidth / 2, innerHeight / 2);
+      if (e.key === '0') reset();
+    });
+
+    // Desktop wheel zoom.
+    stage.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      zoomAt(clampScale(scale * (e.deltaY < 0 ? 1.12 : 1 / 1.12)), e.clientX, e.clientY);
+    }, { passive: false });
+
+    stage.addEventListener('dblclick', function (e) {
+      zoomAt(scale > 1.2 ? MIN : 2.5, e.clientX, e.clientY);
+    });
+
+    stage.addEventListener('pointerdown', function (e) {
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      stage.setPointerCapture(e.pointerId);
+
+      if (pointers.size === 2) {
+        var p = Array.from(pointers.values());
+        pinchDist = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+        pinchScale = scale;
+        dragging = false;
+      } else {
+        dragging = true; lastX = e.clientX; lastY = e.clientY; movedBy = 0;
+      }
+    });
+
+    stage.addEventListener('pointermove', function (e) {
+      if (!pointers.has(e.pointerId)) return;
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      if (pointers.size === 2 && pinchDist > 0) {
+        var p = Array.from(pointers.values());
+        var dist = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+        zoomAt(clampScale(pinchScale * (dist / pinchDist)),
+               (p[0].x + p[1].x) / 2, (p[0].y + p[1].y) / 2);
+        return;
+      }
+
+      if (dragging && scale > 1) {
+        tx += e.clientX - lastX;
+        ty += e.clientY - lastY;
+        movedBy += Math.abs(e.clientX - lastX) + Math.abs(e.clientY - lastY);
+        lastX = e.clientX; lastY = e.clientY;
+        apply();
+      }
+    });
+
+    function endPointer(e) {
+      pointers.delete(e.pointerId);
+      if (pointers.size < 2) pinchDist = 0;
+      if (pointers.size === 0) dragging = false;
+    }
+    stage.addEventListener('pointerup', endPointer);
+    stage.addEventListener('pointercancel', endPointer);
+
+    // Tap the backdrop to close; double tap the picture to zoom.
+    stage.addEventListener('pointerup', function (e) {
+      var onMedia = e.target === img || e.target === video;
+      if (!onMedia && movedBy < 8 && scale === MIN) { window.closeLightbox(); return; }
+
+      if (onMedia && e.pointerType === 'touch') {
+        var now = Date.now();
+        if (now - lastTap < 300) zoomAt(scale > 1.2 ? MIN : 2.5, e.clientX, e.clientY);
+        lastTap = now;
+      }
+    });
+  });
+})();
+</script>

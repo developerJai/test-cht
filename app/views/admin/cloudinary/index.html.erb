@@ -78,7 +78,7 @@
             <% is_orphan = res["_orphan"] %>
             <li class="px-4 py-3">
               <div class="flex items-start gap-3">
-                <button type="button" onclick="toggleCloudImage(<%= idx %>)"
+                <button type="button" data-lightbox-url="<%= url %>" data-lightbox-type="<%= res["resource_type"] %>" data-lightbox-label="<%= pid %>"
                         id="cf-btn-<%= idx %>" aria-controls="cf-<%= idx %>" aria-expanded="false"
                         class="min-w-0 flex-1 flex items-start gap-3 text-left group">
                   <span class="flex-shrink-0 mt-0.5"><%= res["resource_type"] == "video" ? "🎞️" : "🖼️" %></span>
@@ -113,16 +113,6 @@
                 <% end %>
               </div>
 
-              <div id="cf-<%= idx %>" class="hidden mt-3">
-                <% if res["resource_type"] == "video" %>
-                  <video src="<%= url %>" controls class="max-h-96 w-auto rounded-lg border border-gray-200"></video>
-                <% else %>
-                  <img src="<%= url %>" alt="<%= pid %>" loading="lazy" class="max-h-96 w-auto rounded-lg border border-gray-200">
-                <% end %>
-                <p class="mt-1">
-                  <a href="<%= url %>" target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 underline">open full size</a>
-                </p>
-              </div>
             </li>
           <% end %>
         </ul>

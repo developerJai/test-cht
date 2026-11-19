@@ -26,7 +26,7 @@ export default class extends Controller {
       // than on its own trigger, puts it away again.
       const adminPanel = document.getElementById("admin-panel")
       if (adminPanel && !adminPanel.contains(e.target)) {
-        const trigger = e.target.closest ? e.target.closest("#queries-link") : null
+        const trigger = e.target.closest ? e.target.closest("#queries-link, #good-link") : null
         if (!trigger) adminPanel.classList.add("hidden")
       }
     });
