@@ -23,7 +23,7 @@
     <div class="relative isolate overflow-hidden bg-gray-100 px-6 pt-16 shadow-lg sm:rounded-3xl sm:px-16 md:pt-24 lg:flex lg:gap-x-20 lg:px-24 lg:pt-0 border border-gray-200">
       <div class="mx-auto max-w-md text-center lg:mx-0 lg:flex-auto lg:py-32 lg:text-left">
         <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Welcome, <%=@current_user.username%><br>Medicine Information Dashboard</h2>
-        <p class="mt-6 text-lg leading-8 text-gray-600">Access comprehensive drug information, check interactions, and manage your pharmaceutical database queries.
+        <p class="mt-6 text-lg leading-8 text-gray-600">Access comprehensive medicine information, check interactions, and manage your pharmaceutical database queries.
         </p>
         
         <% if @current_user.admin? && @all_users.present? %>
@@ -71,7 +71,7 @@
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <dl class="grid grid-cols-1 gap-x-8 gap-y-16 text-center lg:grid-cols-3">
       <div class="mx-auto flex max-w-xs flex-col gap-y-4">
-        <dt class="text-base leading-7 text-gray-600">Drugs in Database</dt>
+        <dt class="text-base leading-7 text-gray-600">Medicines in Database</dt>
         <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">50,000+</dd>
       </div>
       <div class="mx-auto flex max-w-xs flex-col gap-y-4">

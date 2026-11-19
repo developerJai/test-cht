@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
     <title>MediInfo - Medicine Information Portal</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="theme-color" content="#111827">
@@ -143,7 +144,7 @@
         </div>
         <div class="hidden lg:flex lg:gap-x-12">
           <a href="#" class="text-sm font-semibold leading-6 text-gray-900">Medicines</a>
-          <a href="#" class="text-sm font-semibold leading-6 text-gray-900">Drug Database</a>
+          <a href="#" class="text-sm font-semibold leading-6 text-gray-900">Medicine Database</a>
           <a href="#" class="text-sm font-semibold leading-6 text-gray-900">Interactions</a>
           <a href="#" class="text-sm font-semibold leading-6 text-gray-900">About</a>
         </div>
@@ -157,23 +158,23 @@
       <div class="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
         <div class="hidden sm:mb-8 sm:flex sm:justify-center">
           <div class="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-600 ring-1 ring-gray-300 hover:ring-gray-400">
-            Updated Drug Database - January 2026. <a href="#" class="font-semibold text-gray-900"><span class="absolute inset-0" aria-hidden="true"></span>View Updates <span aria-hidden="true">&rarr;</span></a>
+            Updated Medicine Database - November 2026. <a href="#" class="font-semibold text-gray-900"><span class="absolute inset-0" aria-hidden="true"></span>View Updates <span aria-hidden="true">&rarr;</span></a>
           </div>
         </div>
         <div class="text-center">
           <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl"><%= [
             "Comprehensive Medicine Information Database",
-            "Drug Interactions & Safety Information",
+            "Medicine Interactions & Safety Information",
             "Trusted Healthcare Information Portal",
             "Evidence-Based Medical Knowledge",
-            "Your Complete Drug Reference Guide",
+            "Your Complete Medicine Reference Guide",
             "Prescription & OTC Medicine Database"
             ].sample %></h1>
           <p class="mt-6 text-lg leading-8 text-gray-600">
 
           <%= [
             "Access detailed information about medications, including uses, dosages, side effects, interactions, and safety precautions. Stay informed about your prescriptions.",
-            "Search our comprehensive database of pharmaceutical products, generic alternatives, and therapeutic equivalents. Verify drug interactions instantly.",
+            "Search our comprehensive database of pharmaceutical products, generic alternatives, and therapeutic equivalents. Verify medicine interactions instantly.",
             "Evidence-based medicine information from trusted sources. Get accurate details on contraindications, warnings, and proper medication usage guidelines."
           ].sample %>
 
@@ -181,7 +182,7 @@
           <div class="mt-10 flex items-center justify-center gap-x-6">
             <a href="<%=logout_path%>" class="rounded-md bg-gray-900 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900">Search Medicines</a>
             <button id="installBtn" class="rounded-md bg-gray-700 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-700">Install App</button>
-            <a href="#" class="text-sm font-semibold leading-6 text-gray-900">Drug Interactions <span aria-hidden="true">→</span></a>
+            <a href="#" class="text-sm font-semibold leading-6 text-gray-900">Medicine Interactions <span aria-hidden="true">→</span></a>
           </div>
         </div>
       </div>
@@ -196,7 +197,7 @@
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl sm:text-center">
       <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Professional Subscription Plans</h2>
-      <p class="mt-6 text-lg leading-8 text-gray-600">Access premium features including drug interaction checker, clinical guidelines, dosage calculators, and professional medical references for healthcare providers.</p>
+      <p class="mt-6 text-lg leading-8 text-gray-600">Access premium features including medicine interaction checker, clinical guidelines, dosage calculators, and professional medical references for healthcare providers.</p>
     </div>
     <div class="mx-auto mt-16 max-w-2xl rounded-3xl ring-1 ring-gray-200 sm:mt-20 lg:mx-0 lg:flex lg:max-w-none">
       <div class="p-8 sm:p-10 lg:flex-auto">
@@ -211,7 +212,7 @@
             <svg class="h-6 w-5 flex-none text-gray-900" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
             </svg>
-            Drug Interaction Checker
+            Medicine Interaction Checker
           </li>
           <li class="flex gap-x-3">
             <svg class="h-6 w-5 flex-none text-gray-900" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -258,7 +259,7 @@
         </div>
         <div class="mx-auto mt-10 max-w-2xl lg:mx-0 lg:max-w-none">
           <div class="grid grid-cols-1 gap-x-8 gap-y-6 text-base font-semibold leading-7 text-gray-900 sm:grid-cols-2 md:flex lg:gap-x-10">
-            <a href="#">Drug Monographs <span aria-hidden="true">&rarr;</span></a>
+            <a href="#">Medicine Monographs <span aria-hidden="true">&rarr;</span></a>
             <a href="#">Safety Alerts <span aria-hidden="true">&rarr;</span></a>
             <a href="#">Clinical Studies <span aria-hidden="true">&rarr;</span></a>
             <a href="#">FAQ & Support <span aria-hidden="true">&rarr;</span></a>
