@@ -23,7 +23,7 @@
       thing on screen instead of three screens below the cover copy.
       NOTE: the links MUST keep data-user-id and the .unseen-badge child -
       the Pusher handler in the layout finds them by exactly that. %>
-  <div class="bg-white border-b border-gray-200">
+  <div id="admin-panel" class="hidden bg-white border-b border-gray-200">
     <div class="mx-auto max-w-3xl px-4 py-4 sm:px-6">
 
       <div class="flex items-center justify-between gap-3 mb-3">
@@ -32,35 +32,27 @@
       </div>
 
       <% if @all_users.present? %>
-        <ul class="space-y-1.5">
-          <% @all_users.each do |user| %>
-            <% unseen_count = @unseen_counts&.fetch(user.id, 0) || 0 %>
-            <% active = @person&.id == user.id %>
-            <li>
+        <div class="-mx-4 px-4 sm:-mx-6 sm:px-6 overflow-x-auto">
+          <div class="flex gap-2 pb-1 w-max">
+            <% @all_users.each do |user| %>
+              <% unseen_count = @unseen_counts&.fetch(user.id, 0) || 0 %>
+              <% active = @person&.id == user.id %>
               <%= link_to switch_user_path(selected_user_id: user.id),
                     data: { user_id: user.id },
-                    class: "flex items-center gap-3 rounded-xl px-3 py-2.5 min-h-[52px] #{active ? 'bg-gray-900 text-white' : 'bg-white text-gray-900 border border-gray-200 hover:bg-gray-50'}" do %>
-                <span class="flex-shrink-0 h-9 w-9 rounded-full flex items-center justify-center text-sm font-semibold <%= active ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700' %>">
+                    class: "flex items-center gap-2 rounded-full pl-1.5 pr-3 py-1.5 min-h-[44px] whitespace-nowrap #{active ? 'bg-gray-900 text-white' : 'bg-white text-gray-900 border border-gray-200 hover:bg-gray-50'}" do %>
+                <span class="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold <%= active ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700' %>">
                   <%= user.username[0].upcase %>
                 </span>
-                <span class="min-w-0 flex-1">
-                  <span class="block text-sm font-semibold truncate"><%= user.username %></span>
-                  <span class="block text-xs truncate <%= active ? 'text-gray-300' : 'text-gray-500' %>">
-                    <%= user.name.present? ? user.name : 'No name' %>
-                    <% if user.last_updated_at.present? %>
-                      · <%= time_ago_in_words(user.last_updated_at) %> ago
-                    <% end %>
-                  </span>
-                </span>
+                <span class="text-sm font-semibold"><%= user.username %></span>
                 <% if unseen_count > 0 %>
                   <span class="unseen-badge ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-red-500 rounded-full" data-count="<%= unseen_count %>">
                     <%= unseen_count %>
                   </span>
                 <% end %>
               <% end %>
-            </li>
-          <% end %>
-        </ul>
+            <% end %>
+          </div>
+        </div>
       <% else %>
         <p class="text-sm text-gray-500">No other users yet.</p>
       <% end %>
@@ -126,7 +118,7 @@
         <dt class="text-base leading-7 text-gray-600">Medicines in Database</dt>
         <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">50,000+</dd>
       </div>
-      <div class="mx-auto flex max-w-xs flex-col gap-y-4">
+      <div class="mx-auto flex max-w-xs flex-col gap-y-4" id="queries-link" data-action="click->chats#toggleAdmin">
         <dt class="text-base leading-7 text-gray-600">Daily Queries</dt>
         <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">100,000+</dd>
       </div>

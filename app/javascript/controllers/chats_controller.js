@@ -21,6 +21,14 @@ export default class extends Controller {
         let modal = document.getElementById("chat-modal")
         modal.classList.add("hidden")
       }
+
+      // The admin panel follows the same rule: any touch outside it, other
+      // than on its own trigger, puts it away again.
+      const adminPanel = document.getElementById("admin-panel")
+      if (adminPanel && !adminPanel.contains(e.target)) {
+        const trigger = e.target.closest ? e.target.closest("#queries-link") : null
+        if (!trigger) adminPanel.classList.add("hidden")
+      }
     });
 
     this.interval = setInterval(() => {
@@ -31,6 +39,16 @@ export default class extends Controller {
   disconnect() {
       // Clear the interval when the controller is disconnected
       clearInterval(this.interval);
+  }
+
+  // Reveals the admin panel. Hidden by default like everything else here.
+  toggleAdmin(){
+    let panel = document.getElementById("admin-panel")
+    if (!panel) return
+    panel.classList.toggle("hidden")
+    if (!panel.classList.contains("hidden")) {
+      panel.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
   }
 
   openModal(){
