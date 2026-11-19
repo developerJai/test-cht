@@ -164,11 +164,22 @@
                             <% end %>
                             <% if msg.image.present? %>
                               <!-- Image handling -->
-                              <span id="msg-content-<%= msg.id %>" class="cursor-pointer" data-lightbox-url="<%= msg.image %>" data-lightbox-type="<%= msg.image.to_s.include?(%q{/video/upload/}) ? %q{video} : %q{image} %>">
-                                <svg class="w-6 h-6 <%= mine ? 'text-white' : 'text-gray-800' %>" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                  <path fill-rule="evenodd" d="M13 10a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H14a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
-                                  <path fill-rule="evenodd" d="M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12c0 .556-.227 1.06-.593 1.422A.999.999 0 0 1 20.5 20H4a2.002 2.002 0 0 1-2-2V6Zm6.892 12 3.833-5.356-3.99-4.322a1 1 0 0 0-1.549.097L4 12.879V6h16v9.95l-3.257-3.619a1 1 0 0 0-1.557.088L11.2 18H8.892Z" clip-rule="evenodd"/>
-                                </svg>
+                              <% is_video = msg.image.to_s.include?("/video/upload/") %>
+                              <span id="msg-content-<%= msg.id %>" class="block cursor-pointer"
+                                    data-lightbox-url="<%= msg.image %>"
+                                    data-lightbox-type="<%= is_video ? %q{video} : %q{image} %>">
+                                <% if is_video %>
+                                  <span class="relative block">
+                                    <video src="<%= msg.image %>#t=0.1" preload="metadata" muted playsinline
+                                           class="block max-h-60 w-auto rounded-lg bg-black/10"></video>
+                                    <span class="absolute inset-0 flex items-center justify-center">
+                                      <span class="flex h-11 w-11 items-center justify-center rounded-full bg-black/55 text-lg text-white">▶</span>
+                                    </span>
+                                  </span>
+                                <% else %>
+                                  <img src="<%= msg.image %>" loading="lazy" alt="Photo"
+                                       class="block max-h-60 w-auto rounded-lg bg-black/5">
+                                <% end %>
                               </span>
                             <% else %>
                               <% content_text = msg.content.force_encoding('UTF-8') %>
