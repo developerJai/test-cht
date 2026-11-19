@@ -86,6 +86,7 @@ export default class extends Controller {
         this.markActiveChip(userId)
         this.clearBadge(link)
         this.clearComposer()
+        this.showSwitchLoader(data.username)
         this.reloadConversation()
       })
       .catch((error) => {
@@ -100,6 +101,28 @@ export default class extends Controller {
       })
   }
 
+  showSwitchLoader(username){
+    const loader = document.getElementById("switch-loader")
+    if (!loader) return
+
+    const name = document.getElementById("switch-loader-name")
+    if (name && username) name.textContent = username
+    loader.classList.remove("hidden")
+
+    // The frame tells us when the conversation has actually arrived.
+    const frame = document.getElementById("messages_list")
+    if (!frame) return
+
+    const done = () => {
+      loader.classList.add("hidden")
+      frame.removeEventListener("turbo:frame-load", done)
+    }
+    frame.addEventListener("turbo:frame-load", done)
+
+    // Never leave a spinner running if the frame event does not arrive.
+    setTimeout(done, 8000)
+  }
+
   markActiveChip(userId){
     document.querySelectorAll("a[data-user-id]").forEach((chip) => {
       const on = chip.getAttribute("data-user-id") === String(userId)
@@ -109,6 +132,7 @@ export default class extends Controller {
       chip.classList.toggle("text-gray-900", !on)
       chip.classList.toggle("border", !on)
       chip.classList.toggle("border-gray-200", !on)
+      chip.classList.toggle("[@media(hover:hover)]:hover:bg-gray-50", !on)
 
       const avatar = chip.querySelector("span")
       if (avatar) {
@@ -355,6 +379,13 @@ sendImage(event) {
   const xhr = new XMLHttpRequest()
   xhr.open("POST", form.action, true)
   xhr.setRequestHeader("Accept", "application/json")
+  xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest")
+
+  // Send the token from the meta tag, the way sendMessage already does.
+  // The copy embedded in the form is a per-form token and was rejected
+  // with "Can not verify CSRF token authenticity", so do not rely on it.
+  const csrf = document.querySelector('meta[name="csrf-token"]')
+  if (csrf) xhr.setRequestHeader("X-CSRF-Token", csrf.getAttribute("content"))
 
   xhr.upload.onprogress = (e) => {
     if (!e.lengthComputable) return

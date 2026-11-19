@@ -3,6 +3,9 @@ class Setting < ApplicationRecord
   # from the conversation; nothing deletes them.
   MESSAGE_WINDOW = "message_window_hours".freeze
 
+  # Which conversation an admin lands on before picking one.
+  DEFAULT_CONVERSATION = "default_conversation_user_id".freeze
+
   # Roughly ten years - the "show everything" end of the scale.
   MAX_WINDOW_HOURS = 87_600
 
@@ -30,6 +33,11 @@ class Setting < ApplicationRecord
     return DEFAULTS[MESSAGE_WINDOW] if hours <= 0
 
     [hours, MAX_WINDOW_HOURS].min
+  end
+
+  def self.default_conversation_user_id
+    value = get(DEFAULT_CONVERSATION).to_i
+    value.positive? ? value : nil
   end
 
   def self.message_window_cutoff

@@ -20,6 +20,7 @@ Rails.application.routes.draw do
   # Admin routes
   namespace :admin do
     resources :users do
+      collection { post :arrange }
       member do
         patch :toggle_status
         patch :reset_credentials

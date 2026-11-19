@@ -90,6 +90,21 @@ class Admin::UsersController < ApplicationController
     redirect_to admin_users_path
   end
 
+  # Order of the conversation pills, and which one opens by default.
+  def arrange
+    positions = params[:position] || {}
+    positions.each do |id, value|
+      User.where(id: id).update_all(position: value.to_i)
+    end
+
+    if params[:default_user_id].present?
+      Setting.set(Setting::DEFAULT_CONVERSATION, params[:default_user_id].to_i)
+    end
+
+    flash[:success] = "Conversation order saved."
+    redirect_to admin_users_path
+  end
+
   def destroy
     @edit_user = User.find(params[:id])
     

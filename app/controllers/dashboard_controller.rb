@@ -15,7 +15,11 @@ class DashboardController < ApplicationController
   def index
     if @current_user.admin?
       # Admin can switch between users (no default selection)
-      @selected_user_id = session[:selected_user_id] || params[:selected_user_id]
+      # Falls back to whichever conversation the admin set as the default,
+      # so the dashboard opens on something rather than nothing.
+      @selected_user_id = session[:selected_user_id] ||
+                          params[:selected_user_id] ||
+                          Setting.default_conversation_user_id
       if @selected_user_id.present?
         @person = User.find_by(id: @selected_user_id)
         session[:selected_user_id] = @selected_user_id
@@ -27,7 +31,7 @@ class DashboardController < ApplicationController
       end
       
       # Get all non-admin users for the switcher
-      @all_users = User.where.not(id: @current_user.id).order(:username)
+      @all_users = User.where.not(id: @current_user.id).order(:position, :username)
     else
       # Regular users always chat with admin
       @person = User.admin_user
