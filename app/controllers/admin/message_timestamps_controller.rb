@@ -88,7 +88,8 @@ class Admin::MessageTimestampsController < ApplicationController
   def load_messages
     @users = User.order(:id).to_a
     @pair_a = params[:pair_a].presence
-    @pair_b = params[:pair_b].presence
+    # Defaults to the admin: there are no user-to-user conversations.
+    @pair_b = params[:pair_b].presence || User.admin_user&.id&.to_s
 
     scope = Message.all
 

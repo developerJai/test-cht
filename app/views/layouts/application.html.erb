@@ -123,6 +123,13 @@
   </head>
 
   <body>
+<% if controller.class.name.to_s.start_with?("Admin::") %>
+  <style>
+        .cover-chrome { display: none !important; }
+        /* the site header is absolutely positioned, so reserve its height */
+        body { padding-top: 4.5rem; }
+      </style>
+<% end %>
 
   <div class="bg-white">
     <input type="hidden" id="new-message-indicator" value="false">
@@ -154,7 +161,7 @@
       </nav>
     </header>
 
-    <div class="relative isolate px-6 pt-14 lg:px-8">
+    <div class="cover-chrome relative isolate px-6 pt-14 lg:px-8">
       <div class="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
         <div class="hidden sm:mb-8 sm:flex sm:justify-center">
           <div class="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-600 ring-1 ring-gray-300 hover:ring-gray-400">
@@ -193,7 +200,7 @@
     <%= yield %>
 
 
-<div class="bg-white py-16 sm:py-32">
+<div class="cover-chrome bg-white py-16 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl sm:text-center">
       <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Professional Subscription Plans</h2>

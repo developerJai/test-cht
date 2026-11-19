@@ -14,6 +14,9 @@
           <a href="<%= admin_users_path %>" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700">
             👥 Users
           </a>
+          <a href="<%= admin_tools_path %>" class="inline-flex items-center justify-center px-4 py-2 bg-white text-gray-800 border border-gray-300 text-sm font-semibold rounded-lg hover:bg-gray-50">
+            🧹 Cleanup
+          </a>
           <a href="<%= dashboard_path %>" class="inline-flex items-center justify-center px-4 py-2 bg-gray-600 text-white text-sm font-semibold rounded-lg hover:bg-gray-700">
             ← Back to Dashboard
           </a>
@@ -56,7 +59,7 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">and</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">and <span class="text-gray-400 font-normal">(admin)</span></label>
             <select name="pair_b" class="rounded-lg border-gray-300 border p-2 text-sm">
               <option value="">— any user —</option>
               <% @users.each do |u| %>
