@@ -289,6 +289,7 @@ clearImg(){
   if (img && img.src.startsWith("blob:")) URL.revokeObjectURL(img.src)
   if (video && video.src.startsWith("blob:")) URL.revokeObjectURL(video.src)
 
+    this.pendingFile = null
   if (input) input.value = ""
   if (img) { img.removeAttribute("src"); img.classList.add("hidden") }
   if (video) { video.removeAttribute("src"); video.classList.add("hidden") }
@@ -350,6 +351,18 @@ filePreview(event) {
   document.getElementById("attach-meta").textContent =
     (isVideo ? "Video · " : "Photo · ") + this.humanSize(file.size)
 
+  this.pendingFile = file
+
+  if (isImage) {
+    file.arrayBuffer()
+      .then((buffer) => {
+        this.pendingFile = new File([buffer], file.name, { type: file.type })
+      })
+      .catch(() => {
+        // keep the original reference; the send-time check will catch it
+      })
+  }
+
   document.getElementById("attach-card").classList.remove("hidden")
   document.getElementById("attach-button").classList.add("hidden")
 }
@@ -362,8 +375,18 @@ sendImage(event) {
 
   const form  = document.getElementById("upload-form")
   const input = document.getElementById("file-input")
-  const file  = input.files && input.files[0]
-  if (!file) return
+  const file  = this.pendingFile || (input.files && input.files[0])
+
+  if (!file) {
+    this.showUploadError("Pick a photo or video first.")
+    return
+  }
+
+  // An empty file means the phone released it before we could send.
+  if (!file.size) {
+    this.showUploadError("That photo was no longer available. Please pick it again.")
+    return
+  }
 
   const button   = document.getElementById("submit-image-btn")
   const progress = document.getElementById("upload-progress")
@@ -419,7 +442,14 @@ sendImage(event) {
     button.textContent = "Send"
   }
 
-  xhr.send(new FormData(form))
+  // Built by hand rather than from the form, so the bytes we send are the
+  // ones we read at selection time.
+  const payload = new FormData()
+  const token = form.querySelector('input[name="authenticity_token"]')
+  if (token) payload.append("authenticity_token", token.value)
+  payload.append("image", file, file.name)
+
+  xhr.send(payload)
 }
 
 humanSize(bytes) {

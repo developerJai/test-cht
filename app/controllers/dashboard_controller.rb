@@ -246,6 +246,12 @@ class DashboardController < ApplicationController
       return { ok: false, error: "That was not a file. Pick a photo or video." }
     end
 
+    # A real file part that arrived with no bytes - usually a phone releasing
+    # a camera capture before the upload started.
+    if file.size.to_i.zero?
+      return { ok: false, error: "That file came through empty. Please pick it again." }
+    end
+
     recipient = get_conversation_partner
     return { ok: false, error: "Open a conversation before sending a file." } if recipient.blank?
 
