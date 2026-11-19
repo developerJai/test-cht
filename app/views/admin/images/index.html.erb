@@ -59,7 +59,11 @@
               <button type="button" data-lightbox-url="<%= url %>" data-lightbox-label="<%= name %>"
                       id="img-btn-<%= msg.id %>" aria-controls="img-<%= msg.id %>" aria-expanded="false"
                       class="w-full flex items-start gap-3 text-left group">
-                <span class="flex-shrink-0 mt-0.5 text-gray-400 group-hover:text-gray-600">🖼️</span>
+                <span class="flex-shrink-0">
+                  <img src="<%= url.sub("/upload/", "/upload/w_160,h_160,c_fill,q_auto,f_auto/") %>"
+                       loading="lazy" alt="<%= name %>"
+                       class="h-16 w-16 rounded-lg object-cover bg-gray-100">
+                </span>
                 <span class="min-w-0 flex-1">
                   <span class="block text-sm font-medium text-blue-700 group-hover:underline break-all"><%= name %></span>
                   <span class="block text-xs text-gray-500">

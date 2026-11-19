@@ -81,7 +81,15 @@
                 <button type="button" data-lightbox-url="<%= url %>" data-lightbox-type="<%= res["resource_type"] %>" data-lightbox-label="<%= pid %>"
                         id="cf-btn-<%= idx %>" aria-controls="cf-<%= idx %>" aria-expanded="false"
                         class="min-w-0 flex-1 flex items-start gap-3 text-left group">
-                  <span class="flex-shrink-0 mt-0.5"><%= res["resource_type"] == "video" ? "🎞️" : "🖼️" %></span>
+                  <span class="flex-shrink-0">
+                    <% if res["resource_type"] == "video" %>
+                      <span class="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-100 text-xl">🎞️</span>
+                    <% else %>
+                      <img src="<%= url.sub("/upload/", "/upload/w_160,h_160,c_fill,q_auto,f_auto/") %>"
+                           loading="lazy" alt="<%= pid %>"
+                           class="h-16 w-16 rounded-lg object-cover bg-gray-100">
+                    <% end %>
+                  </span>
                   <span class="min-w-0 flex-1">
                     <span class="block text-sm font-medium text-blue-700 group-hover:underline break-all"><%= pid %></span>
                     <span class="block text-xs text-gray-500">
