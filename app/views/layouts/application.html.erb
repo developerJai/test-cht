@@ -123,6 +123,16 @@
   </head>
 
   <body>
+<style>
+  /* Stops iOS zooming the whole page when a field takes focus. */
+  @media (max-width: 767px) {
+    input, select, textarea { font-size: 16px; }
+  }
+  /* Kills double-tap-to-zoom on controls; pinch zoom still works. */
+  a, button, input, select, textarea, label, [role="button"], [data-action] {
+    touch-action: manipulation;
+  }
+</style>
 <% if controller.class.name.to_s.start_with?("Admin::") %>
   <style>
         .cover-chrome { display: none !important; }

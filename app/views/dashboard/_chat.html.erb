@@ -69,20 +69,21 @@
                     <% end %>
                   </small>
                 <% end %>
-                <div class="w-full max-w-xl lg:max-w-none max-h-80 overflow-y-scroll overflow-x-hidden" id="message-container">
+                <div class="w-full max-w-xl lg:max-w-none max-h-[55vh] lg:max-h-[60vh] overflow-y-auto overflow-x-hidden px-1" id="message-container">
                   <% @messages.each do |msg| %>
-                    <div class="flex items-start mt-1" attr-msg="msg-time-<%=msg.id%>" data-action="click->chats#messageTimestamp">
-                       <div class="flex flex-col w-full max-w-[320px] lg:max-w-[65%] leading-1.5 p-1 border-gray-200 <%= msg.user_id == @current_user.id ? 'bg-emerald-50 ml-auto text-right rounded-s-xl rounded-ee-xl' : 'bg-gray-100 rounded-e-xl rounded-es-xl' %>">
-                          <div class="text-sm font-normal text-gray-900 dark:text-white">
+                    <% mine = msg.user_id == @current_user.id %>
+                    <div class="flex mt-1.5 <%= mine ? 'justify-end' : 'justify-start' %>" attr-msg="msg-time-<%=msg.id%>" data-action="click->chats#messageTimestamp">
+                       <div class="flex flex-col max-w-[78%] lg:max-w-[62%] leading-snug px-3 py-2 shadow-sm <%= mine ? 'bg-emerald-600 text-white rounded-2xl rounded-br-md' : 'bg-white text-gray-900 border border-gray-200 rounded-2xl rounded-bl-md' %>">
+                          <div class="text-sm font-normal break-words <%= mine ? 'text-white' : 'text-gray-900' %>">
                             <% if msg.reply_for.present? %>
-                              <span class="text-gray-500 bg-gray-40 rounded dark:bg-gray-700 dark:text-gray-300">
+                              <span class="block mb-1 pl-2 border-l-2 text-xs <%= mine ? 'border-emerald-300 text-emerald-50' : 'border-gray-300 text-gray-500' %>">
                                 ➦ <%=linkify(msg.reply_for.force_encoding('UTF-8'))%>
                               </span><br>
                             <% end %>
                             <% if msg.image.present? %>
                               <!-- Image handling -->
-                              <span id="msg-content-<%= msg.id %>" class="<%= msg.user_id == @current_user.id ? 'float-right' : '' %>" data-modal-target="image-modal-<%= msg.id %>" data-action="click->chats#openImageModal">
-                                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                              <span id="msg-content-<%= msg.id %>" class="cursor-pointer" data-modal-target="image-modal-<%= msg.id %>" data-action="click->chats#openImageModal">
+                                <svg class="w-6 h-6 <%= mine ? 'text-white' : 'text-gray-800' %>" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                   <path fill-rule="evenodd" d="M13 10a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H14a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
                                   <path fill-rule="evenodd" d="M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12c0 .556-.227 1.06-.593 1.422A.999.999 0 0 1 20.5 20H4a2.002 2.002 0 0 1-2-2V6Zm6.892 12 3.833-5.356-3.99-4.322a1 1 0 0 0-1.549.097L4 12.879V6h16v9.95l-3.257-3.619a1 1 0 0 0-1.557.088L11.2 18H8.892Z" clip-rule="evenodd"/>
                                 </svg>
@@ -93,7 +94,11 @@
                               <span id="msg-content-<%= msg.id %>"> <%= emojify(linkify(content_text)) %> </span>
                             <% end %>
 
-                            <small id="msg-time-<%=msg.id%>" class="hidden">
+                            <span class="block mt-0.5 text-[10px] <%= mine ? 'text-emerald-100 text-right' : 'text-gray-400' %>">
+                              <%= msg.created_at.in_time_zone("Asia/Kolkata").strftime("%-I:%M %p") %>
+                            </span>
+
+                            <small id="msg-time-<%=msg.id%>" class="hidden <%= mine ? 'text-emerald-100' : 'text-gray-500' %>">
                               (<%=msg.id%>) <%=time_ago_in_words(msg.created_at)%> ago 
 
                               <button type="button" class="inline-flex items-center p-1 ms-2 text-sm text-gray-400 bg-transparent rounded-sm hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-gray-300 float-right" id="add-reply" data-action="click->chats#addReply" attr-msg-id="<%=msg.id%>">
