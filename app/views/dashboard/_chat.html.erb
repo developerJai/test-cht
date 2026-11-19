@@ -114,6 +114,11 @@
                 <button class="hidden flex-none rounded-md bg-gray-200 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-200" id="sending-message"><span aria-hidden="true">...</span></button>
               </div>
 
+              <div id="edit-banner" class="hidden flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-2.5 py-1.5 text-xs text-amber-900">
+                <span class="flex-shrink-0 font-semibold">Editing:</span>
+                <span id="edit-banner-text" class="min-w-0 flex-1 truncate"></span>
+                <button type="button" class="flex-shrink-0 font-semibold hover:underline" data-action="click->chats#cancelEdit">Cancel</button>
+              </div>
               <span id="reply-msg-box" class="flex items-center px-2 py-1 me-2 text-sm font-medium text-gray-800 bg-gray-100 rounded dark:bg-gray-700 dark:text-gray-300 hidden">
                 <input type="hidden" id="reply-to-id">
                 <div id="reply-to"></div>
@@ -145,7 +150,11 @@
                 <div class="w-full max-w-xl lg:max-w-none max-h-[55vh] lg:max-h-[60vh] overflow-y-auto overflow-x-hidden px-1" id="message-container">
                   <% @messages.each do |msg| %>
                     <% mine = msg.user_id == @current_user.id %>
-                    <div class="flex mt-1.5 <%= mine ? 'justify-end' : 'justify-start' %>" attr-msg="msg-time-<%=msg.id%>" data-action="click->chats#messageTimestamp">
+                    <div class="group relative flex mt-1.5 <%= mine ? 'justify-end' : 'justify-start' %>"
+                         data-msg-id="<%= msg.id %>" data-msg-mine="<%= mine %>"
+                         data-msg-editable="<%= mine && msg.image.blank? %>"
+                         data-action="touchstart->chats#swipeStart touchmove->chats#swipeMove touchend->chats#swipeEnd">
+                      <span class="pointer-events-none absolute left-1 top-1/2 -translate-y-1/2 text-gray-400 opacity-0" data-swipe-hint>↩</span>
                        <div class="flex flex-col max-w-[78%] lg:max-w-[62%] leading-snug px-3 py-2 shadow-sm <%= mine ? 'bg-emerald-600 text-white rounded-2xl rounded-br-md' : 'bg-white text-gray-900 border border-gray-200 rounded-2xl rounded-bl-md' %>">
                           <div class="text-sm font-normal break-words <%= mine ? 'text-white' : 'text-gray-900' %>">
                             <% if msg.reply_for.present? %>
@@ -166,18 +175,23 @@
                               <span id="msg-content-<%= msg.id %>"> <%= emojify(linkify(content_text)) %> </span>
                             <% end %>
 
-                            <span class="block mt-0.5 text-[10px] <%= mine ? 'text-emerald-100 text-right' : 'text-gray-400' %>">
+                            <span class="mt-0.5 flex items-center gap-1.5 text-[10px] <%= mine ? 'justify-end text-emerald-100' : 'text-gray-400' %>">
                               <%= msg.created_at.in_time_zone("Asia/Kolkata").strftime("%-I:%M %p") %>
+                              <% if msg.edited_at.present? %>
+                                <span title="Edited">· edited</span>
+                              <% end %>
+
+                              <button type="button" title="Reply" aria-label="Reply"
+                                      class="ml-1 opacity-60 hover:opacity-100" 
+                                      data-action="click->chats#addReply" attr-msg-id="<%= msg.id %>">↩</button>
+
+                              <% if mine && msg.image.blank? %>
+                                <button type="button" title="Edit" aria-label="Edit"
+                                        class="opacity-60 hover:opacity-100"
+                                        data-action="click->chats#startEdit" attr-msg-id="<%= msg.id %>">✎</button>
+                              <% end %>
                             </span>
 
-                            <small id="msg-time-<%=msg.id%>" class="hidden <%= mine ? 'text-emerald-100' : 'text-gray-500' %>">
-                              (<%=msg.id%>) <%=time_ago_in_words(msg.created_at)%> ago 
-
-                              <button type="button" class="inline-flex items-center p-1 ms-2 text-sm text-gray-400 bg-transparent rounded-sm hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-gray-300 float-right" id="add-reply" data-action="click->chats#addReply" attr-msg-id="<%=msg.id%>">
-                                Reply
-                                <span class="sr-only">Reply</span>
-                              </button>
-                            </small>
                           </div>
                        </div>
                     </div>

@@ -123,6 +123,40 @@ class DashboardController < ApplicationController
     render json: {code: 200, message: "Send", msg: msg&.content }
   end
 
+  # Editing a message. Scoped through @current_user.messages, so a user can
+  # only ever reach their own - the id in the URL is not trusted.
+  def update_msg
+    msg = @current_user.messages.find_by(id: params[:id])
+
+    if msg.nil?
+      return render json: { ok: false, error: "You can only edit your own messages." }, status: :forbidden
+    end
+
+    if msg.image.present?
+      return render json: { ok: false, error: "Pictures and videos cannot be edited." }, status: :unprocessable_entity
+    end
+
+    text = Base64.decode64(params[:encrypted_data].to_s).to_s
+
+    if text.strip.empty?
+      return render json: { ok: false, error: "A message cannot be left empty." }, status: :unprocessable_entity
+    end
+
+    if text == msg.content
+      return render json: { ok: true, unchanged: true }
+    end
+
+    msg.update!(content: text, edited_at: Time.current)
+
+    begin
+      send_pusher
+    rescue StandardError => e
+      Rails.logger.error("pusher after edit: #{e.class}: #{e.message}")
+    end
+
+    render json: { ok: true }
+  end
+
   def text_removed
     return render json: { code: 404 } unless params[:msg].present?
 

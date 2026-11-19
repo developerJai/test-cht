@@ -182,6 +182,9 @@ export default class extends Controller {
   }
 
   sendMessage(){
+    // While a message is being edited, the same button saves it.
+    if (this.editingId && this.saveEdit()) return
+
     const msgBox = document.getElementById("text-message")
     const msgValue = msgBox.value
 
@@ -264,6 +267,147 @@ export default class extends Controller {
       msgTimeDiv.classList.add("hidden")
     }
   }
+
+// ---------------------------------------------------------------- replying
+// Swipe a bubble to the right to reply, the way every chat app does. The
+// threshold is deliberately generous so a scroll is never mistaken for it.
+swipeStart(event){
+  const touch = event.touches && event.touches[0]
+  if (!touch) return
+  this.swipeRow = event.currentTarget
+  this.swipeX = touch.clientX
+  this.swipeY = touch.clientY
+  this.swiping = false
+}
+
+swipeMove(event){
+  if (!this.swipeRow) return
+  const touch = event.touches && event.touches[0]
+  if (!touch) return
+
+  const dx = touch.clientX - this.swipeX
+  const dy = touch.clientY - this.swipeY
+
+  // Vertical movement means the list is being scrolled - leave it alone.
+  if (Math.abs(dy) > Math.abs(dx)) { this.cancelSwipe(); return }
+  if (dx <= 0) return
+
+  this.swiping = true
+  const shift = Math.min(dx, 72)
+  this.swipeRow.style.transform = "translateX(" + shift + "px)"
+
+  const hint = this.swipeRow.querySelector("[data-swipe-hint]")
+  if (hint) hint.style.opacity = String(Math.min(shift / 60, 1))
+
+  if (dx > 10 && event.cancelable) event.preventDefault()
+}
+
+swipeEnd(){
+  if (!this.swipeRow) return
+  const row = this.swipeRow
+  const shift = parseFloat((row.style.transform.match(/-?\d+(\.\d+)?/) || [0])[0])
+
+  row.style.transition = "transform 150ms ease"
+  row.style.transform = "translateX(0)"
+  setTimeout(() => { row.style.transition = "" }, 180)
+
+  const hint = row.querySelector("[data-swipe-hint]")
+  if (hint) hint.style.opacity = "0"
+
+  if (this.swiping && shift >= 50) this.replyTo(row.getAttribute("data-msg-id"))
+  this.cancelSwipe()
+}
+
+cancelSwipe(){
+  if (this.swipeRow) {
+    this.swipeRow.style.transform = ""
+    const hint = this.swipeRow.querySelector("[data-swipe-hint]")
+    if (hint) hint.style.opacity = "0"
+  }
+  this.swipeRow = null
+  this.swiping = false
+}
+
+replyTo(messageId){
+  if (!messageId) return
+  const content = document.getElementById("msg-content-" + messageId)
+  const text = content ? content.innerText.trim() : ""
+
+  document.getElementById("reply-to-id").value = messageId
+  document.getElementById("reply-to").innerText =
+    "Reply to: " + (text.length > 60 ? text.substring(0, 60) + "..." : text)
+  document.getElementById("reply-msg-box").classList.remove("hidden")
+  this.scrollMsgsBtm()
+}
+
+// ---------------------------------------------------------------- editing
+startEdit(event){
+  event.preventDefault()
+  event.stopPropagation()
+
+  const id = event.currentTarget.getAttribute("attr-msg-id")
+  const content = document.getElementById("msg-content-" + id)
+  if (!content) return
+
+  const box = document.getElementById("text-message")
+  box.value = content.innerText.trim()
+  box.focus()
+
+  this.editingId = id
+  this.showEditBanner(box.value)
+}
+
+showEditBanner(original){
+  let banner = document.getElementById("edit-banner")
+  if (!banner) return
+  const label = document.getElementById("edit-banner-text")
+  if (label) {
+    label.textContent = original.length > 50 ? original.substring(0, 50) + "..." : original
+  }
+  banner.classList.remove("hidden")
+}
+
+cancelEdit(){
+  this.editingId = null
+  const banner = document.getElementById("edit-banner")
+  if (banner) banner.classList.add("hidden")
+  const box = document.getElementById("text-message")
+  if (box) box.value = ""
+}
+
+saveEdit(){
+  const box = document.getElementById("text-message")
+  const text = box.value.trim()
+  const id = this.editingId
+  if (!id) return false
+
+  if (text === "") {
+    alert("A message cannot be left empty.")
+    return true
+  }
+
+  const token = document.querySelector('meta[name="csrf-token"]')
+
+  fetch("/dash/msg/" + id, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "X-CSRF-Token": token ? token.getAttribute("content") : ""
+    },
+    body: JSON.stringify({ encrypted_data: btoa(unescape(encodeURIComponent(text))) }),
+    credentials: "same-origin"
+  })
+    .then((r) => r.json())
+    .then((result) => {
+      if (!result.ok) { alert(result.error || "The message could not be changed."); return }
+      this.cancelEdit()
+      this.reloadConversation()
+    })
+    .catch(() => alert("The message could not be changed."))
+
+  return true
+}
 
   addReply(){
     const replyMsgId= event.currentTarget.getAttribute("attr-msg-id")
